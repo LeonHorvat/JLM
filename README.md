@@ -1,4 +1,4 @@
-# JLM
+# e-kartoteka
 Repozitorij za projekt pri predmetu osnove podatkovnih baz, na katerem delamo: Leon Horvat, Metod Jazbec in Jernej Banevec.
 
 Poskusili bomo implementirati medicinsko bazo, v katero se bodo beležili vsi opravljeni pregledi. 
