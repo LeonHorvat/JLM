@@ -12,8 +12,8 @@ CREATE TABLE bolezen (
 	ime TEXT UNIQUE NOT NULL
 );
 
-CREATE TABLE zdravila (
-	zdravilaID INTEGER PRIMARY KEY,
+CREATE TABLE zdravilo (
+	zdraviloID INTEGER PRIMARY KEY,
 	ime TEXT UNIQUE NOT NULL
 );
 
@@ -23,13 +23,13 @@ CREATE TABLE test (
 );
 
 CREATE TABLE zdravnik (
-	zdravnikID INTEGER PRIMARY KEY,
+	zdravnikID SERIAL PRIMARY KEY,
 	ime TEXT NOT NULL,
 	priimek TEXT NOT NULL
 );
 
 CREATE TABLE oseba (
-	osebaID INTEGER PRIMARY KEY,
+	osebaID SERIAL PRIMARY KEY,
 	ime TEXT NOT NULL,
 	priimek TEXT NOT NULL,
 	kri TEXT NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE specializacija (
 );
 
 CREATE TABLE diagnoza (
-	diagnozaID INTEGER PRIMARY KEY,
+	diagnozaID SERIAL PRIMARY KEY,
 	bolezen INTEGER NOT NULL REFERENCES bolezen(bolezenID),
 	zdravilo INTEGER NOT NULL REFERENCES zdravilo(zdraviloID),
 	zdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID)
