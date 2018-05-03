@@ -57,7 +57,7 @@ CREATE TABLE pregled (
 	zdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID),
 	testZdaj INTEGER NOT NULL REFERENCES test(testID),
 	testNaprej INTEGER NOT NULL REFERENCES test(testID),
-	diagnoza INTEGER REFERENCES diagnoza(diagnozaID),
+	diagnoza INTEGER REFERENCES diagnoza(diagnozaID) DEFAULT NULL,
 	izvid TEXT,
 	datum DATE DEFAULT now() CHECK (datum <= now())
 );
@@ -65,7 +65,18 @@ CREATE TABLE pregled (
 /* ne deluje */
 CREATE TRIGGER posodobitev AFTER INSERT ON pregled
 FOR EACH ROW
-WHEN (last(diagnoza) <> NULL),
-   UPDATE pregled
+WHEN (last(diagnoza) <> NULL)
+EXECUTE PROCEDURE UPDATE pregled
    SET pregled(diagnoza) = last(pregled(diagnoza))
    WHERE pregled(oseba) = last(pregled(oseba)) AND pregled(diagnoza) = NULL;
+   
+/* alternativno - tudi ne deluje */
+CREATE TRIGGER posodobitev
+ON pregled
+AFTER INSERT
+AS
+BEGIN
+  UPDATE pregled 
+     SET pregled(diagnoza) = last(pregled(diagnoza))
+     WHERE pregled(oseba) = last(pregled(oseba)) AND pregled(diagnoza) = NULL;
+END
