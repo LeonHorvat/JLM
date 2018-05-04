@@ -25,17 +25,23 @@ CREATE TABLE test (
 CREATE TABLE zdravnik (
 	zdravnikID SERIAL PRIMARY KEY,
 	ime TEXT NOT NULL,
-	priimek TEXT NOT NULL
+	priimek TEXT NOT NULL,
+	rojstvo DATE NOT NULL
 );
 
 CREATE TABLE oseba (
 	osebaID SERIAL PRIMARY KEY,
 	ime TEXT NOT NULL,
 	priimek TEXT NOT NULL,
+	rojstvo DATE NOT NULL,
 	kri TEXT NOT NULL,
 	teza DECIMAL NOT NULL,
 	visina DECIMAL NOT NULL,
-	osebniZdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID)
+	osebniZdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID),
+	CONSTRAINT sam_svoj_zdravnik CHECK (/* TODO*/),
+	CONSTRAINT napoved_rojstva CHECK (rojstvo <= now()),
+	CONSTRAINT nepozitivna_teza CHECK (teza > 0),
+	CONSTRAINT nepozitivna_visina CHECK (visina > 0)
 );
 
 CREATE TABLE specializacija (
@@ -56,10 +62,12 @@ CREATE TABLE pregled (
 	oseba INTEGER NOT NULL REFERENCES oseba(osebaID),
 	zdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID),
 	testZdaj INTEGER NOT NULL REFERENCES test(testID),
-	testNaprej INTEGER NOT NULL REFERENCES test(testID),
+	testNaprej INTEGER REFERENCES test(testID) DEFAULT NULL,
 	diagnoza INTEGER REFERENCES diagnoza(diagnozaID) DEFAULT NULL,
 	izvid TEXT,
-	datum DATE DEFAULT now() CHECK (datum <= now())
+	datum DATE DEFAULT now(), 
+	CONSTRAINT napoved_pregleda CHECK (datum <= now()),
+	CONSTRAINT brez_diagnoze_in_napotnice CHECK (testNaprej IS NOT NULL OR diagnoza IS NOT NULL)
 );
 
 /* ne deluje */
