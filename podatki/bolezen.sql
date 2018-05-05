@@ -1,4 +1,4 @@
-INSERT INTO bolezen(bolezenID,ime) VALUES ('A00','Kolera');
+﻿INSERT INTO bolezen(bolezenID,ime) VALUES ('A00','Kolera');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('A00.0','Kolera, ki jo povzroča Vibrio cholerae 01, biovar cholerae');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('A00.1','Kolera, ki jo povzroča Vibrio cholerae 01, biovar eltor');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('A00.9','Kolera, neopredeljena');
@@ -1332,7 +1332,6 @@ INSERT INTO bolezen(bolezenID,ime) VALUES ('C79.7','Sekundarna maligna neoplazma
 INSERT INTO bolezen(bolezenID,ime) VALUES ('C79.8','Sekundarna maligna neoplazma drugih opredeljenih mest');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('C79.81','Sekundarna maligna neoplazma dojke');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('C79.82','Sekundarna maligna neoplazma spolnih organov');
-INSERT INTO bolezen(bolezenID,ime) VALUES ('C79.88','Sekundarna maligna neoplazma drugih opredeljenih mest');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('C80','Maligna neoplazma brez opredelitve mesta');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('C81','Hodgkinova bolezen');
 INSERT INTO bolezen(bolezenID,ime) VALUES ('C81.0','Hodgkinova bolezen, prevladovanje limfocitov');
