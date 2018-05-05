@@ -21,26 +21,32 @@
     <div class="card card-login mx-auto mt-5">
       <div class="card-header">Login</div>
       <div class="card-body">
-        <form>
-          <div class="form-group">
-            <label for="exampleInputEmail1">Who's the real supaRk?</label>
-            <input class="form-control" id="exampleInputEmail1" type="email" aria-describedby="emailHelp" placeholder="Enter email">
-          </div>
-          <div class="form-group">
-            <label for="exampleInputPassword1">If 'mydick' is your password im sure it's too short</label>
-            <input class="form-control" id="exampleInputPassword1" type="password" placeholder="Password">
-          </div>
-          <div class="form-group">
-            <div class="form-check">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox"> Remember Password</label>
-            </div>
-          </div>
-          <a class="btn btn-primary btn-block" href="/static/index.html">Login</a>
-        </form>
+        	  <form class="form-signin" role="form" method="post" action=".">
+    <label for="exampleInputUsername1">Username</label>
+    <input type="username" class="form-control" placeholder="Uporabniško ime"
+								   %if username:
+								   value="{{username}}"
+								   %end
+	name="username" required autofocus>
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" class="form-control" placeholder="Geslo" name="password" required>
+          
+    <div class="form-group">
+        <div class="form-check">
+            <label class="form-check-label">
+            <input class="form-check-input" type="checkbox"> Remember Password</label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Login</button>
+		  <h5>
+							%if napaka is not None:
+									{{napaka}}
+							%end
+		  </h5>
+    </form>
         <div class="text-center">
-          <a class="d-block small mt-3" href="/static/register.html">Register an Account</a>
-          <a class="d-block small" href="/static/forgot-password.html">Forgot Password?</a>
+          <a class="d-block small mt-3" href="/register/">Register an Account</a>
+          <a class="d-block small" href="/forgot-password/">Forgot Password?</a>
         </div>
       </div>
     </div>
@@ -53,3 +59,6 @@
 </body>
 
 </html>
+
+
+
