@@ -19,7 +19,7 @@ CREATE TABLE zdravilo (
 
 CREATE TABLE test (
 	testID TEXT PRIMARY KEY,
-	ime TEXT NOT NULL
+	ime TEXT NOT NULL /* TEXT oblike zaradi prilagoditve indeksem srovih podatkov*/
 );
 
 CREATE TABLE zdravnik (
@@ -70,6 +70,25 @@ CREATE TABLE pregled (
 	CONSTRAINT napoved_pregleda CHECK (datum <= now()),
 	CONSTRAINT brez_diagnoze_in_napotnice CHECK (testNaprej IS NOT NULL OR diagnoza IS NOT NULL)
 );
+
+GRANT ALL ON ALL TABLES IN SCHEMA public TO metodj;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO leonh;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO jernejb;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO metodj;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO leonh;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO jernejb;
+
+
+/* ============ KOPIRAJ LE DO TU, KODA SPODAJ ŠE NE DELUJE ============ */
+
+
+/* Definiral zgolj za nadaljevanje za določene pravice, ki komu pripadajo - role "zdravnik" tu še ne obstaja*/ 
+GRANT SELECT, UPDATE, INSERT ON pregled IN SCHEMA public TO zdravnik_uporabnik;
+GRANT SELECT, UPDATE, INSERT ON zdravnik IN SCHEMA public TO direktor_uporabnik;
+GRANT SELECT, UPDATE, INSERT ON zdravilo IN SCHEMA public TO direktor_uporabnik;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO zdravnik_uporabnik;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO pacient_uporabnik;
+
 
 /* ne deluje */
 CREATE TRIGGER posodobitev AFTER INSERT ON pregled
