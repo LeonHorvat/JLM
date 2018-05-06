@@ -14,18 +14,36 @@ cur = baza.cursor(cursor_factory=psycopg2.extras.DictCursor)
 #test priklopa na bazo
 def test(posta):
     cur.execute('''
-                    SELECT * FROM uporabnik
-
+                    SELECT * FROM uporabnik WHERE username=%s
                 ''', [posta])
-    return (cur.fetchall())
+    return (cur.fetchone())
 
-print(test('posta'))
+print(test('sgalea0'))
+
+
+#zdravnik testni zajcek
+#username: sgalea0
+#password: wXNoal
+
+
+#raziskovalec testni zajcek
+#username: rdollarh
+#password: 7t6rIU
 
 
 ################
 #bottle uvod, pomozne funkcije
 static_dir = "./static"
 secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
+
+def pooblastilo(user):
+    c = baza.cursor()
+    c.execute("SELECT pooblastilo FROM uporabnik WHERE username=%s",
+              [user])
+    r = c.fetchone()[0]
+    c.close()
+    return r
+
 
 def password_md5(s):
     """Vrni MD5 hash danega UTF-8 niza. Gesla vedno spravimo v bazo
@@ -87,17 +105,28 @@ def login_post():
     password = password_md5(request.forms.password)
     # Preverimo, ali se je uporabnik pravilno prijavil
     c = baza.cursor()
-    c.execute("SELECT 1 FROM uporabnik WHERE username=%s AND password=%s",
+    c.execute("SELECT * FROM uporabnik WHERE username=%s AND hash=%s",
               [username, password])
-    if c.fetchone() is None:
+    tmp = c.fetchone()
+    if tmp is None:
         # Username in geslo se ne ujemata
         return template("login.html",
                                napaka="Nepravilna prijava",
                                username=username)
     else:
-        # Vse je v redu, nastavimo cookie in preusmerimo na glavno stran
         response.set_cookie('username', username, path='/', secret=secret)
-        redirect("/index/")
+        if tmp[2] == 'zdravnik':
+            redirect('/index/')
+        elif tmp[2] == 'raziskovalec':
+            redirect("/indexraziskovalec/")
+        else:
+            redirect("/indexdirektor/")
+
+
+    # else:
+    #     # Vse je v redu, nastavimo cookie in preusmerimo na glavno stran
+    #     response.set_cookie('username', username, path='/', secret=secret)
+    #     redirect("/index/")
 
 @get("/logout/")
 def logout():
@@ -109,9 +138,37 @@ def logout():
 @get("/index/")
 def index():
     curuser = get_user()
-    #print(curuser)
-    return template("index.html", user=curuser[0])
+    if pooblastilo(curuser[0]) == 'raziskovalec':
+        redirect('/indexraziskovalec/')
+    elif pooblastilo(curuser[0]) == 'direktor':
+        redirect('/indexdirektor/')
+    else:
+        return template("index.html", user=curuser[0])
+
+@get("/indexdirektor/")
+def index_direktor():
+    curuser = get_user()
+    if pooblastilo(curuser[0]) == 'raziskovalec':
+        redirect('/indexraziskovalec/')
+    elif pooblastilo(curuser[0]) == 'zdravnik':
+        redirect('/index/')
+    else:
+        return template("indexdirektor.html", user=curuser[0])
+
+@get("/indexraziskovalec/")
+def index_direktor():
+    curuser = get_user()
+    if pooblastilo(curuser[0]) == 'zdravnik':
+        redirect('/index/')
+    elif pooblastilo(curuser[0]) == 'direktor':
+        redirect('/indexdirektor/')
+    else:
+        return template("indexraziskovalec.html", user=curuser[0])
 
 
 
 run(host='localhost', port=8080)
+
+
+#TODO: popravi login_post
+#TODO: popravi piskotke
