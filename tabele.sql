@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS zdravnik CASCADE;
+﻿DROP TABLE IF EXISTS zdravnik CASCADE;
 DROP TABLE IF EXISTS oseba CASCADE;
 DROP TABLE IF EXISTS pregled CASCADE;
 DROP TABLE IF EXISTS test CASCADE;
@@ -23,7 +23,7 @@ CREATE TABLE test (
 );
 
 CREATE TABLE zdravnik (
-	zdravnikID SERIAL PRIMARY KEY,
+	zdravnikID TEXT PRIMARY KEY,
 	ime TEXT NOT NULL,
 	priimek TEXT NOT NULL,
 	rojstvo DATE NOT NULL
@@ -38,7 +38,7 @@ CREATE TABLE oseba (
 	kri TEXT NOT NULL,
 	teza DECIMAL NOT NULL,
 	visina DECIMAL NOT NULL,
-	osebniZdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID),
+	osebniZdravnik TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
 	CONSTRAINT sam_svoj_zdravnik CHECK (/* TODO*/),
 	CONSTRAINT napoved_rojstva CHECK (rojstvo <= now()),
 	CONSTRAINT nepozitivna_teza CHECK (teza > 0),
@@ -46,7 +46,7 @@ CREATE TABLE oseba (
 );
 
 CREATE TABLE specializacija (
-    zdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID) ON DELETE CASCADE,
+    zdravnik TEXT NOT NULL REFERENCES zdravnik(zdravnikID) ON DELETE CASCADE,
     test TEXT NOT NULL REFERENCES test(testID) ON DELETE CASCADE,
     PRIMARY KEY (zdravnik, test)
 );
@@ -55,13 +55,13 @@ CREATE TABLE diagnoza (
 	diagnozaID SERIAL PRIMARY KEY,
 	bolezen TEXT NOT NULL REFERENCES bolezen(bolezenID),
 	zdravilo INTEGER NOT NULL REFERENCES zdravilo(zdraviloID),
-	zdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID)
+	zdravnik TEXT NOT NULL REFERENCES zdravnik(zdravnikID)
 );
 
 CREATE TABLE pregled (
     pregledID SERIAL PRIMARY KEY,
 	oseba INTEGER NOT NULL REFERENCES oseba(osebaID),
-	zdravnik INTEGER NOT NULL REFERENCES zdravnik(zdravnikID),
+	zdravnik TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
 	testZdaj TEXT NOT NULL REFERENCES test(testID),
 	testNaprej TEXT REFERENCES test(testID) DEFAULT NULL,
 	diagnoza INTEGER REFERENCES diagnoza(diagnozaID) DEFAULT NULL,
@@ -70,6 +70,15 @@ CREATE TABLE pregled (
 	CONSTRAINT napoved_pregleda CHECK (datum <= now()),
 	CONSTRAINT brez_diagnoze_in_napotnice CHECK (testNaprej IS NOT NULL OR diagnoza IS NOT NULL)
 );
+
+CREATE TABLE uporabnik (
+	username TEXT PRIMARY KEY,
+	hash TEXT NOT NULL,
+	pooblastilo TEXT NOT NULL
+);
+
+
+
 
 GRANT ALL ON ALL TABLES IN SCHEMA public TO metodj;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO leonh;

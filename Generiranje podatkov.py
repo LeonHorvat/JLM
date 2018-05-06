@@ -27,34 +27,56 @@ datumi = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\datumi.csv', encoding
                    sep = ';')
 datum = list(datumi.datum)
 
+uporabniki = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\uporabniki.csv', encoding = "ISO-8859-1",
+                   error_bad_lines=False,
+                   sep = ',')
+geslo = list(uporabniki.password)
+username = list(uporabniki.username)
+pooblastilo = list(uporabniki.pooblastilo)
+
+zdravniki = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\zdravniki.csv', encoding = 'utf8',
+                   error_bad_lines=False,
+                   sep = ',')
+ime = list(zdravniki.ime)
+priimek = list(zdravniki.priimek)
+rojstvo = list(zdravniki.rojstvo)
+
+
+
 import random
 
+def username_zdravnik(username, pooblastilo):
+    zdravnik_user = []
+    for j in range(len(username)):
+        if pooblastilo[j] == 'zdravnik':
+            zdravnik_user.append(username[j])
+    return zdravnik_user
 
-def naredi_podatke_specializacija(stevilo, datoteka):
+def naredi_podatke_specializacija(stevilo, datoteka, username, pooblastilo):
     #generira INSERT SQL stavke za tabelo specializacija in jih zapise v datoteko
-    zdravniki = [i + 1 for i in range(200)]
+    zdravniki = username_zdravnik(username, pooblastilo)
     with open(datoteka, "w") as text_file:
         for j in range(stevilo):
             vrstica = [random.choice(zdravniki), random.choice(testID)]
-            text_file.write("INSERT INTO specializacija(zdravnik,test) VALUES ({0},'{1}');".format(*vrstica))
+            text_file.write("INSERT INTO specializacija(zdravnik,test) VALUES ('{0}','{1}');".format(*vrstica))
 
 
 specializacija = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\specializacija.txt'
 
-#naredi_podatke_specializacija(500, specializacija)
+naredi_podatke_specializacija(500, specializacija, username, pooblastilo)
 
-def naredi_podatke_diagnoza(stevilo, datoteka):
+def naredi_podatke_diagnoza(stevilo, datoteka, username, pooblastilo):
     # generira INSERT SQL stavke za tabelo diagnoza in jih zapise v datoteko
-    zdravniki = [i + 1 for i in range(200)]
+    zdravniki = username_zdravnik(username, pooblastilo)
     with open(datoteka, "w") as text_file:
         for j in range(stevilo):
             vrstica = [random.choice(bolezenID), random.choice(zdraviloID), random.choice(zdravniki)]
-            text_file.write("INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) VALUES ('{0}',{1}, {2});".format(*vrstica))
+            text_file.write("INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) VALUES ('{0}',{1}, '{2}');".format(*vrstica))
 
 
 diagnoza = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\diagnoza.txt'
 
-#naredi_podatke_diagnoza(10000, diagnoza)
+naredi_podatke_diagnoza(10000, diagnoza, username, pooblastilo)
 
 import time
 
@@ -69,9 +91,9 @@ def randomDate(start, end, prop):
 
 randomDate("2018-1-1", "2018-2-2", random.random())
 
-def naredi_podatke_pregled(datoteka):
+def naredi_podatke_pregled(datoteka, username, pooblastilo):
     # generira INSERT SQL stavke za tabelo pregled in jih zapise v datoteko
-    zdravniki = [i + 1 for i in range(200)]
+    zdravniki = username_zdravnik(username, pooblastilo)
     osebe = [i + 2 for i in range(1000)]
     st_pregledov = [1,2,3,4,5,6]
     with open(datoteka, "w") as text_file:
@@ -88,9 +110,55 @@ def naredi_podatke_pregled(datoteka):
                         "INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
                         "({0},{1},'{2}',NULL,{4},{5},'{6}');".format(*vrstica))
                 text_file.write("INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
-                                "({0},{1},'{2}','{3}',{4},{5},'{6}');".format(*vrstica))
+                                "({0},'{1}','{2}','{3}',{4},{5},'{6}');".format(*vrstica))
                 date = randomDate(date, "2018-5-5", random.random())
 
 pregled = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\pregled.txt'
 
-naredi_podatke_pregled(pregled)
+naredi_podatke_pregled(pregled, username, pooblastilo)
+
+
+import hashlib
+
+def naredi_hash(geslo):
+    #Naredi hash podanega gesla
+    h = hashlib.md5()
+    h.update(geslo.encode('utf-8'))
+    return h.hexdigest()
+
+def pretvori_gesla_v_hash(geslo):
+    #pretvori seznam gesel v seznam hash-ov
+    h = []
+    for i in geslo:
+        a = naredi_hash(i)
+        h.append(a)
+    return h
+
+def naredi_podatke_uporabniki(uporabnik, geslo, pooblastilo, datoteka):
+    hash = pretvori_gesla_v_hash(geslo)
+    with open(datoteka, "w") as text_file:
+        for j in range(len(uporabnik)):
+            vrstica = [uporabnik[j], hash[j], pooblastilo[j]]
+            text_file.write("INSERT INTO uporabnik(username,hash,pooblastilo) VALUES ('{0}','{1}','{2}');".format(*vrstica))
+
+uporabnik = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\uporabnik.txt'
+
+#naredi_podatke_uporabniki(username, geslo, pooblastilo, uporabnik)
+
+# tabela z gesli in hashi - zasebna
+hash = pretvori_gesla_v_hash(geslo)
+hash = pd.DataFrame({'hash': hash})
+uporabniki_zasebno = uporabniki.join(hash)
+#uporabniki_zasebno.to_csv(path_or_buf='C:\\Faks\\OPB\\uporabniki_zasebno.csv', sep=';', na_rep='', float_format=None, columns=None, header=True, index=False, index_label=None, mode='w', encoding=None, compression=None, quoting=None, quotechar='"', line_terminator='\n', chunksize=None, tupleize_cols=None, date_format=None, doublequote=True, escapechar=None, decimal=',')
+
+
+def naredi_podatke_zdravnik(uporabnik, ime, priimek, rojstvo, pooblastilo, datoteka):
+    with open(datoteka, "w") as text_file:
+        for j in range(len(uporabnik)):
+            if pooblastilo[j] == 'zdravnik':
+                vrstica = [uporabnik[j], ime[j], priimek[j], rojstvo[j]]
+                text_file.write("INSERT INTO zdravnik(zdravnikID,ime,priimek,rojstvo) VALUES ('{0}','{1}','{2}','{3}');".format(*vrstica))
+
+zdravnik = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\zdravnik.txt'
+
+naredi_podatke_zdravnik(username, ime, priimek, rojstvo, pooblastilo, zdravnik)
