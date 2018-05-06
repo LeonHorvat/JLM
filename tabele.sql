@@ -88,6 +88,22 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO leonh;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO jernejb;
 
 
+/* preveri če deluje - vprašljiva funkcionalnost*/
+DROP TRIGGER IF EXISTS posodobitev ON pregled CASCADE;
+DROP FUNCTION IF EXISTS posodobitev();
+
+CREATE FUNCTION posodobitev() RETURNS trigger AS $posodobitev$
+    BEGIN
+        IF (NEW.diagnoza <> NULL) THEN
+			UPDATE pregled SET diagnoza = NEW.diagnoza 
+			WHERE pregled(oseba) = NEW.oseba AND pregled(diagnoza) = NULL;
+		END IF;
+    END;
+$posodobitev$ LANGUAGE plpgsql;
+
+CREATE TRIGGER posodobitev AFTER INSERT ON pregled
+    FOR EACH ROW EXECUTE PROCEDURE posodobitev();
+
 /* ============ KOPIRAJ LE DO TU, KODA SPODAJ ŠE NE DELUJE ============ */
 
 
@@ -98,22 +114,3 @@ GRANT SELECT, UPDATE, INSERT ON zdravilo IN SCHEMA public TO direktor_uporabnik;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO zdravnik_uporabnik;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO pacient_uporabnik;
 
-
-/* ne deluje */
-CREATE TRIGGER posodobitev AFTER INSERT ON pregled
-FOR EACH ROW
-WHEN (last(diagnoza) <> NULL)
-EXECUTE PROCEDURE UPDATE pregled
-   SET pregled(diagnoza) = last(pregled(diagnoza))
-   WHERE pregled(oseba) = last(pregled(oseba)) AND pregled(diagnoza) = NULL;
-   
-/* alternativno - tudi ne deluje */
-CREATE TRIGGER posodobitev
-ON pregled
-AFTER INSERT
-AS
-BEGIN
-  UPDATE pregled 
-     SET pregled(diagnoza) = last(pregled(diagnoza))
-     WHERE pregled(oseba) = last(pregled(oseba)) AND pregled(diagnoza) = NULL;
-END
