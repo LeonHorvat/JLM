@@ -79,6 +79,19 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO leonh;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO jernejb;
 
 
+/* preveri če deluje */
+CREATE FUNCTION posodobitev() RETURNS trigger AS $posodobitev$
+    BEGIN
+        IF (NEW.diagnoza <> NULL) THEN
+			UPDATE pregled SET pregled.diagnoza = NEW.diagnoza 
+			WHERE pregled(oseba) = NEW.oseba AND pregled(diagnoza) = NULL;
+		END IF;
+    END;
+$posodobitev$ LANGUAGE plpgsql;
+
+CREATE TRIGGER posodobitev AFTER INSERT ON pregled
+    FOR EACH ROW EXECUTE PROCEDURE posodobitev();
+
 /* ============ KOPIRAJ LE DO TU, KODA SPODAJ ŠE NE DELUJE ============ */
 
 
