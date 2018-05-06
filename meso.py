@@ -25,6 +25,7 @@ print(test('posta'))
 ################
 #bottle uvod, pomozne funkcije
 static_dir = "./static"
+secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
 
 def password_md5(s):
     """Vrni MD5 hash danega UTF-8 niza. Gesla vedno spravimo v bazo
@@ -33,7 +34,32 @@ def password_md5(s):
     h.update(s.encode('utf-8'))
     return h.hexdigest()
 
-print(password_md5('mat555'))
+def get_user(auto_login = True, auto_redir=False):
+    """Poglej cookie in ugotovi, kdo je prijavljeni uporabnik,
+       vrni njegov username in ime. Ce ni prijavljen, presumeri
+       na stran za prijavo ali vrni None (advisno od auto_login).
+    """
+    # Dobimo username iz piskotka
+    username = request.get_cookie('username', secret=secret)
+    # Preverimo, ali ta uporabnik obstaja
+    if username is not None:
+		#Ce uporabnik ze prijavljen, nima smisla, da je na route login
+		if auto_redir:
+			redirect('/index/')
+		else:
+			c = baza.cursor()
+			c.execute("SELECT username FROM uporabnik WHERE username=%s",
+					  [username])
+			r = c.fetchone()
+			c.close ()
+			if r is not None:
+				# uporabnik obstaja, vrnemo njegove podatke
+				return r
+    # Ce pridemo do sem, uporabnik ni prijavljen, naredimo redirect
+    if auto_login:
+        redirect('/login/')
+    else:
+        return None
 
 @route("/static/<filename:path>")
 def static(filename):
@@ -47,7 +73,7 @@ def static(filename):
 @get("/login/")
 def login_get():
     """Serviraj formo za login."""
-    #curuser = get_user(auto_redir = True)
+    curuser = get_user(auto_login = False, auto_redir = True)
     return template("login.html",
                            napaka=None,
                            username=None)
@@ -70,13 +96,22 @@ def login_post():
                                username=username)
     else:
         # Vse je v redu, nastavimo cookie in preusmerimo na glavno stran
-        #response.set_cookie('username', username, path='/', secret=secret)
+        response.set_cookie('username', username, path='/', secret=secret)
         redirect("/index/")
+
+@get("/logout/")
+def logout():
+    """Pobrisi cookie in preusmeri na login."""
+    response.delete_cookie('username', path='/', secret=secret)
+    #print(get_user())
+    redirect('/login/')
 
 @get("/index/")
 def index():
-    """Serviraj formo za login."""
-    #curuser = get_user(auto_redir = True)
-    return template("index.html")
+    curuser = get_user()
+    #print(curuser)
+    return template("index.html", user=curuser[0])
+
+
 
 run(host='localhost', port=8080)
