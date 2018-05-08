@@ -41,6 +41,9 @@ ime = list(zdravniki.ime)
 priimek = list(zdravniki.priimek)
 rojstvo = list(zdravniki.rojstvo)
 
+osebe = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\oseba.csv', encoding = 'utf8',
+                   error_bad_lines=False,
+                   sep = ',')
 
 
 import random
@@ -63,7 +66,7 @@ def naredi_podatke_specializacija(stevilo, datoteka, username, pooblastilo):
 
 specializacija = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\specializacija.txt'
 
-naredi_podatke_specializacija(500, specializacija, username, pooblastilo)
+#naredi_podatke_specializacija(500, specializacija, username, pooblastilo)
 
 def naredi_podatke_diagnoza(stevilo, datoteka, username, pooblastilo):
     # generira INSERT SQL stavke za tabelo diagnoza in jih zapise v datoteko
@@ -76,7 +79,7 @@ def naredi_podatke_diagnoza(stevilo, datoteka, username, pooblastilo):
 
 diagnoza = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\diagnoza.txt'
 
-naredi_podatke_diagnoza(10000, diagnoza, username, pooblastilo)
+#naredi_podatke_diagnoza(10000, diagnoza, username, pooblastilo)
 
 import time
 
@@ -108,7 +111,7 @@ def naredi_podatke_pregled(datoteka, username, pooblastilo):
                 if k == i-1:
                     text_file.write(
                         "INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
-                        "({0},{1},'{2}',NULL,{4},{5},'{6}');".format(*vrstica))
+                        "({0},'{1}','{2}',NULL,{4},{5},'{6}');".format(*vrstica))
                 text_file.write("INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
                                 "({0},'{1}','{2}','{3}',{4},{5},'{6}');".format(*vrstica))
                 date = randomDate(date, "2018-5-5", random.random())
@@ -161,4 +164,22 @@ def naredi_podatke_zdravnik(uporabnik, ime, priimek, rojstvo, pooblastilo, datot
 
 zdravnik = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\zdravnik.txt'
 
-naredi_podatke_zdravnik(username, ime, priimek, rojstvo, pooblastilo, zdravnik)
+#naredi_podatke_zdravnik(username, ime, priimek, rojstvo, pooblastilo, zdravnik)
+
+def naredi_podatke_oseba(osebe, zdravniki, datoteka):
+    ime = list(osebe.ime)
+    priimek = list(osebe.priimek)
+    rojstvo = list(osebe.rojstvo)
+    naslov = list(osebe.naslov)
+    kri = list(osebe.kri)
+    teza = list(osebe.teza)
+    visina = list(osebe.visina)
+    with open(datoteka, "w") as text_file:
+        for j in range(len(ime)):
+            osebniZdravnik = random.choice(zdravniki)
+            vrstica = [ime[j], priimek[j], rojstvo[j], naslov[j], kri[j], teza[j], visina[j], osebniZdravnik]
+            text_file.write("INSERT INTO oseba(ime,priimek,rojstvo,naslov,kri,teza,visina,osebniZdravnik) VALUES ('{0}','{1}','{2}','{3}','{4}',{5},{6},'{7}');".format(*vrstica))
+
+oseba = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\oseba.txt'
+
+#naredi_podatke_oseba(osebe, username_zdravnik(username, pooblastilo), oseba)
