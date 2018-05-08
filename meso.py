@@ -61,18 +61,18 @@ def get_user(auto_login = True, auto_redir=False):
     username = request.get_cookie('username', secret=secret)
     # Preverimo, ali ta uporabnik obstaja
     if username is not None:
-		#Ce uporabnik ze prijavljen, nima smisla, da je na route login
-		if auto_redir:
-			redirect('/index/')
-		else:
-			c = baza.cursor()
-			c.execute("SELECT username FROM uporabnik WHERE username=%s",
+        #Ce uporabnik ze prijavljen, nima smisla, da je na route login
+        if auto_redir:
+            redirect('/index/')
+        else:
+            c = baza.cursor()
+            c.execute("SELECT username FROM uporabnik WHERE username=%s",
 					  [username])
-			r = c.fetchone()
-			c.close ()
-			if r is not None:
-				# uporabnik obstaja, vrnemo njegove podatke
-				return r
+            r = c.fetchone()
+            c.close ()
+            if r is not None:
+                # uporabnik obstaja, vrnemo njegove podatke
+                return r
     # Ce pridemo do sem, uporabnik ni prijavljen, naredimo redirect
     if auto_login:
         redirect('/login/')
@@ -145,6 +145,12 @@ def index():
     else:
         return template("index.html", user=curuser[0])
 
+#@post("/index/")
+#def kartoteka():
+ #   ID = request.forms.ID
+ #   c = baza.cursor()
+ #   c.execute("SELECT * FROM uporabnik WHERE username=%s AND hash=%s",
+ #             [username, password])
 
 @get("/indexdirektor/")
 def index_direktor():

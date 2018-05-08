@@ -164,8 +164,46 @@
 	  <div class="row">
         <div class="col-12" id="kartoteka" style="display:none;">
           <form>
+            <div class="col-12">Išči po ID-u pacienta
+            </div>
+          </form>
+          <form>
             <div class="input-group">
-              <input class="form-control" type="text" placeholder="Search for...">
+              <input class="form-control" type="text" placeholder="ID pacienta">
+              <span class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+          </form>
+		  <form>
+            <div class="col-12">Išči po imenu, priimku in rojstvu pacienta
+            </div>
+          </form>
+          <form>
+            <div class="input-group">
+              <input class="form-control" type="text" placeholder="Ime pacienta">
+              <span class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+          </form>
+		  <form>
+            <div class="input-group">
+              <input class="form-control" type="text" placeholder="Priimek pacienta">
+              <span class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+          </form>
+		  <form>
+            <div class="input-group">
+              <input class="form-control" type="text" placeholder="Rojstvo pacienta">
               <span class="input-group-append">
                 <button class="btn btn-primary" type="button">
                   <i class="fa fa-search"></i>
@@ -228,6 +266,7 @@
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("kartoteka");
 		var z = document.getElementById("vnos");
+		var W = 
 		x.style.display = "none";
 		y.style.display = "block";
 		z.style.display = "none";

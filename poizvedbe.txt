@@ -1,0 +1,23 @@
+## poizvedba za vse diagnoze s pregledi za neko osebo --podrobno (možnost izvida, testa, zdravnika)
+SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
+JOIN test ON pregled.testZdaj = test.testID
+JOIN oseba ON pregled.oseba = oseba.osebaID
+JOIN diagnoza 
+ JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+ JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
+ JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
+ON pregled.diagnoza = diagnoza.diagnozaID
+
+WHERE oseba.ime = 'Anissa' AND oseba.priimek = 'Breslane'
+ORDER BY pregled.datum DESC
+
+
+## poizvedba diagnoz za neko osebo
+SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
+JOIN oseba ON pregled.oseba = oseba.osebaID
+JOIN diagnoza 
+ JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+ON pregled.diagnoza = diagnoza.diagnozaID
+
+WHERE oseba.ime = 'Anissa' AND oseba.priimek = 'Breslane'
+ORDER BY pregled.datum DESC
