@@ -145,6 +145,7 @@ def index():
     else:
         return template("index.html", user=curuser[0])
 
+
 @get("/indexdirektor/")
 def index_direktor():
     curuser = get_user()
