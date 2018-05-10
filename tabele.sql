@@ -78,6 +78,13 @@ CREATE TABLE uporabnik (
 );
 
 
+CREATE TABLE sporocila (
+	posiljateljID TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
+	prejemnikID TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
+	datum DATE DEFAULT now(),
+	vsebina TEXT NOT NULL,
+	prebrano BOOLEAN DEFAULT FALSE
+);
 
 
 GRANT ALL ON ALL TABLES IN SCHEMA public TO metodj;
@@ -86,6 +93,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO jernejb;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO metodj;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO leonh;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO jernejb;
+
 
 
 /* preveri če deluje - vprašljiva funkcionalnost*/
