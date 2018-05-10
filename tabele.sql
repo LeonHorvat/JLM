@@ -79,11 +79,11 @@ CREATE TABLE uporabnik (
 
 
 CREATE TABLE sporocila (
-	posiljateljID TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
-	prejemnikID TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
+	posiljatelj TEXT NOT NULL REFERENCES uporabnik(username),
+	prejemnik TEXT NOT NULL REFERENCES uporabnik(username),
 	datum DATE DEFAULT now(),
-	vsebina TEXT NOT NULL,
-	prebrano BOOLEAN DEFAULT FALSE
+	vsebina TEXT NOT NULL
+	/* prebrano BOOLEAN DEFAULT FALSE */
 );
 
 
@@ -104,7 +104,7 @@ CREATE FUNCTION posodobitev() RETURNS trigger AS $posodobitev$
     BEGIN
         IF (NEW.diagnoza <> NULL) THEN
 			UPDATE pregled SET diagnoza = NEW.diagnoza 
-			WHERE pregled(oseba) = NEW.oseba AND pregled(diagnoza) = NULL;
+			WHERE oseba = NEW.oseba AND OLD.diagnoza = NULL;
 		END IF;
     END;
 $posodobitev$ LANGUAGE plpgsql;
