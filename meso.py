@@ -145,12 +145,28 @@ def index():
     else:
         return template("index.html", user=curuser[0])
 
-#@post("/index/")
-#def kartoteka():
- #   ID = request.forms.ID
- #   c = baza.cursor()
- #   c.execute("SELECT * FROM uporabnik WHERE username=%s AND hash=%s",
- #             [username, password])
+@post("/index/")
+def kartoteka():
+    # iz vpsanega osebaID vrni tabelo diagnoz te osebe, razvrščene po datumu
+    ID = request.forms.ID
+    c = baza.cursor()
+    c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
+                JOIN oseba ON pregled.oseba = oseba.osebaID
+                JOIN diagnoza
+                JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                ON pregled.diagnoza = diagnoza.diagnozaID
+                WHERE oseba.osebaID = %s
+                ORDER BY pregled.datum DESC""",
+              [ID])
+    tmp = c.fetchall()
+    #if tmp is None:
+        # ID osebe v bazi ne obstaja
+    #    return template("index.html",
+    #                           napaka="Nepravilna poizvedba")
+
+    return str(tmp)
+
+
 
 @get("/indexdirektor/")
 def index_direktor():
