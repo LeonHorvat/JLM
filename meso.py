@@ -191,6 +191,13 @@ def index_direktor():
 @get("/index/messenger/")
 def messenger():
     curuser = get_user()
+    #c = baza.cursor()
+    #c.execute("""SELECT * FROM sporocila
+    #            WHERE sporocila.prejemnik = %s
+    #            ORDER BY sporocila.datum DESC""",
+    #          [curuser[0]])
+    #tmp = c.fetchall()
+    #return template("messenger.html", rows=tmp, user=curuser[0])
     return template("messenger.html", user=curuser[0])
 
 run(host='localhost', port=8080)
