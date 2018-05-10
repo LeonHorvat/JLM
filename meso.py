@@ -188,7 +188,10 @@ def index_direktor():
     else:
         return template("indexraziskovalec.html", user=curuser[0])
 
-
+@get("/index/messenger/")
+def messenger():
+    curuser = get_user()
+    return template("messenger.html", user=curuser[0])
 
 run(host='localhost', port=8080)
 
