@@ -143,12 +143,13 @@ def index():
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
     else:
-        return template("index.html", user=curuser[0])
+        return template("index.html", user=curuser[0], click = False)
 
 @post("/index/")
 def kartoteka():
     # iz vpsanega osebaID vrni tabelo diagnoz te osebe, razvrščene po datumu
     ID = request.forms.ID
+    curuser = get_user()
     c = baza.cursor()
     c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
                 JOIN oseba ON pregled.oseba = oseba.osebaID
@@ -159,12 +160,11 @@ def kartoteka():
                 ORDER BY pregled.datum DESC""",
               [ID])
     tmp = c.fetchall()
-    #if tmp is None:
+    if tmp is None:
         # ID osebe v bazi ne obstaja
-    #    return template("index.html",
-    #                           napaka="Nepravilna poizvedba")
-
-    return str(tmp)
+        return template("index.html", napaka="Nepravilna poizvedba")
+    if tmp is not None:
+        return template("index.html", rows=tmp, click = True, napaka = None, user=curuser[0])
 
 
 
