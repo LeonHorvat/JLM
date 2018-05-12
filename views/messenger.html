@@ -35,7 +35,7 @@
         </li>
         <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
           <a class="nav-link" onclick="myFunction()">
-            <i class="fa fa-fw fa-plus-square"></i>
+            <i class="fa fa-fw fa-envelope-o"></i>
             <span class="nav-link-text">Pregled vseh sporočil</span>
           </a>
         </li>
@@ -74,7 +74,7 @@
      <div class="col-12" id="osnovna">
 	  <div class="card mb-3">
         <div class="card-header">
-          <i class="fa fa-envelope-open"></i> Sporočila</div>
+          <i class="fa fa-envelope-open-o"></i> Sporočila</div>
         <div class="card-body">
           <div class="table">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -103,10 +103,9 @@
     </div>
 	  <div class="row">
         <div class="col-12" id="vnos" style="display:none;">
-		  <form>
-            <div class="col-12">VNESITE NOVO SPOROČILO
-            </div>
-          </form>
+	  <div class="card mb-3">
+        <div class="card-header">
+          <i class="fa fa-commenting-o"></i> Sestavite novo sporočilo</div>
           <form method="post" action=".">
             <div class="input-group">
               <input class="form-control" type="prejID" name="prejID" placeholder="Prejemnik">
@@ -127,6 +126,8 @@
 	  
         </div>
       </div>
+    </div>
+		 </div>
     </div>
     <!-- /.container-fluid-->
     <!-- /.content-wrapper-->
