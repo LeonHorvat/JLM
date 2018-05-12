@@ -202,7 +202,13 @@ def messenger():
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
     tmp = c.fetchall()
-    return template("messenger.html", rows=tmp, user=curuser[0], prejID=None, napaka=None)
+    c1 = baza.cursor()
+    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.posiljatelj = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp1 = c1.fetchall()
+    return template("messenger.html", rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka=None)
     #return template("messenger.html", user=curuser[0])
 
 @post("/index/messenger/")

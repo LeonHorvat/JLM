@@ -36,9 +36,15 @@
         <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
           <a class="nav-link" onclick="myFunction()">
             <i class="fa fa-fw fa-envelope-o"></i>
-            <span class="nav-link-text">Pregled vseh sporočil</span>
+            <span class="nav-link-text">Prejeta sporočila</span>
           </a>
         </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
+          <a class="nav-link" onclick="myFunction3()">
+            <i class="fa fa-fw fa-envelope-o"></i>
+            <span class="nav-link-text">Poslana sporočila</span>
+          </a>
+        </li>		
       </ul>
       <ul class="navbar-nav sidenav-toggler">
         <li class="nav-item">
@@ -71,10 +77,10 @@
   <div class="container-fluid">
       <!-- Breadcrumbs-->
 	<div class="row">
-     <div class="col-12" id="osnovna">
+     <div class="col-12" id="prejeta">
 	  <div class="card mb-3">
         <div class="card-header">
-          <i class="fa fa-envelope-open-o"></i> Sporočila</div>
+          <i class="fa fa-envelope-open-o"></i> Prejeta sporočila</div>
         <div class="card-body">
           <div class="table">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -101,6 +107,39 @@
       </div>
 	 </div>
     </div>
+	
+	<div class="row">
+     <div class="col-12" id="poslana" style="display:none;">
+	  <div class="card mb-3">
+        <div class="card-header">
+          <i class="fa fa-envelope-open-o"></i> Poslana sporočila</div>
+        <div class="card-body">
+          <div class="table">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+				  <th>Prejemnik</th>
+                  <th>Datum</th>
+                  <th>Sporočilo</th>
+                </tr>
+              </thead>
+			  <tbody>  
+			  % for row in rows_p:
+				<tr>
+                  %for col in row:
+					<td>{{col}}</td>
+				  %end
+                </tr>
+			  %end
+			 </tbody>
+            </table>
+          </div>
+		  
+        </div>
+      </div>
+	 </div>
+    </div>
+
 	  <div class="row">
         <div class="col-12" id="vnos" style="display:none;">
 	  <div class="card mb-3">
@@ -183,18 +222,32 @@
     <!-- Bootstrap core JavaScript-->
 	<script>
 	function myFunction() {
-		var x = document.getElementById("osnovna");
+		var x = document.getElementById("prejeta");
 		var y = document.getElementById("vnos");
+		var z = document.getElementById("poslana");
 		x.style.display = "block";
 		y.style.display = "none";
+		z.style.display = "none";
 	}
 	</script>
 	<script>
 	function myFunction2() {
-		var x = document.getElementById("osnovna");
+		var x = document.getElementById("prejeta");
 		var y = document.getElementById("vnos");
+		var z = document.getElementById("poslana");
 		x.style.display = "none";
 		y.style.display = "block";
+		z.style.display = "none";
+	}
+	</script>
+	<script>
+	function myFunction3() {
+		var x = document.getElementById("prejeta");
+		var y = document.getElementById("vnos");
+		var z = document.getElementById("poslana");
+		x.style.display = "none";
+		y.style.display = "none";
+		z.style.display = "block";
 	}
 	</script>
     <script src="\static\vendor/jquery/jquery.min.js"></script>
