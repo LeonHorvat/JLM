@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS specializacija CASCADE;
 DROP TABLE IF EXISTS diagnoza CASCADE;
 DROP TABLE IF EXISTS bolezen CASCADE;
 DROP TABLE IF EXISTS zdravilo CASCADE;
+DROP TABLE IF EXISTS sporocila CASCADE;
 
 CREATE TABLE bolezen (
 	bolezenID TEXT PRIMARY KEY,
@@ -81,7 +82,7 @@ CREATE TABLE uporabnik (
 CREATE TABLE sporocila (
 	posiljatelj TEXT NOT NULL REFERENCES uporabnik(username),
 	prejemnik TEXT NOT NULL REFERENCES uporabnik(username),
-	datum DATE DEFAULT now(),
+	datum TIMESTAMP(0) DEFAULT now(),
 	vsebina TEXT NOT NULL
 	/* prebrano BOOLEAN DEFAULT FALSE */
 );

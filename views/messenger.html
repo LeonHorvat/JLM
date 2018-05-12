@@ -110,7 +110,7 @@
           <form method="post" action=".">
             <div class="input-group">
               <input class="form-control" type="prejID" name="prejID" placeholder="Prejemnik">
-              <span class="input-group-append">
+              <span class="input-group-append" name="form1">
 
               </span>
             </div>
@@ -119,19 +119,13 @@
 		  <form method="post" action=".">
             <div class="input-group">
               <input class="form-control" type="sporocilo" name="sporocilo" placeholder="Vsebina sporočila">
-              <span class="input-group-append">
-			  <!--
-                <button class="btn btn-primary" type="submit">
-                  <i class="fa fa-search"></i>
-                </button>
-				  -->
+              <span class="input-group-append" name="form2">
+
               </span>
             </div>
           </form>
-
+	  
         </div>
-		<!-- Spodnji del je zgolj poiskušanje-->
-        <input type="button" value="Click Me!" onclick="submitForms()" />
       </div>
     </div>
     <!-- /.container-fluid-->
@@ -178,7 +172,6 @@
 	function myFunction2() {
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("vnos");
-		var W = 
 		x.style.display = "none";
 		y.style.display = "block";
 	}
