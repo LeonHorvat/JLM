@@ -93,6 +93,9 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO jernejb;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO metodj;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO leonh;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO jernejb;
+GRANT ALL ON sporocila TO metodj;
+GRANT ALL ON sporocila TO leonh;
+GRANT ALL ON sporocila TO jernejb;
 
 
 
