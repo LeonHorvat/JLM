@@ -215,7 +215,7 @@ def novo_sporocilo():
     c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
                 VALUES (%s, %s, %s)""",
               [curuser[0], prejID, sporocilo])
-    #redirect('/index/messanger/')
+    redirect('/index/messenger/')
 
 run(host='localhost', port=8080)
 
