@@ -190,15 +190,28 @@ def index_direktor():
 
 @get("/index/messenger/")
 def messenger():
+    '''Servira stran (na novi routi) z vsemi sporočili, tudi z vstavljanjem'''
     curuser = get_user()
-    #c = baza.cursor()
-    #c.execute("""SELECT * FROM sporocila
-    #            WHERE sporocila.prejemnik = %s
-    #            ORDER BY sporocila.datum DESC""",
-    #          [curuser[0]])
-    #tmp = c.fetchall()
-    #return template("messenger.html", rows=tmp, user=curuser[0])
-    return template("messenger.html", user=curuser[0])
+    c = baza.cursor()
+    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp = c.fetchall()
+    return template("messenger.html", rows=tmp, user=curuser[0])
+    #return template("messenger.html", user=curuser[0])
+
+@post("/index/messenger/")
+def novo_sporocilo():
+    ''' Vstavi novo sporocilo v tabelo sporocila.'''
+    prejID = request.forms.get('prejID')
+    sporocilo = request.forms.get('sporocilo')
+    curuser = get_user()
+    c = baza.cursor()
+    c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
+                VALUES (%s, %s, %s)""",
+              [curuser[0], prejID, sporocilo])
+    #redirect('/index/messanger/')
 
 run(host='localhost', port=8080)
 

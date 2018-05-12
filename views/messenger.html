@@ -33,6 +33,12 @@
             <span class="nav-link-text">Ustvari novo</span>
           </a>
         </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
+          <a class="nav-link" onclick="myFunction()">
+            <i class="fa fa-fw fa-plus-square"></i>
+            <span class="nav-link-text">Pregled vseh sporočil</span>
+          </a>
+        </li>
       </ul>
       <ul class="navbar-nav sidenav-toggler">
         <li class="nav-item">
@@ -64,7 +70,8 @@
   <div class="content-wrapper">
   <div class="container-fluid">
       <!-- Breadcrumbs-->
-	  <!--
+	<div class="row">
+     <div class="col-12" id="osnovna">
 	  <div class="card mb-3">
         <div class="card-header">
           <i class="fa fa-envelope-open"></i> Sporočila</div>
@@ -73,6 +80,7 @@
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
               <thead>
                 <tr>
+				  <th>Pošiljatelj</th>
                   <th>Datum</th>
                   <th>Sporočilo</th>
                 </tr>
@@ -88,13 +96,42 @@
 			 </tbody>
             </table>
           </div>
+		  
         </div>
       </div>
-	  -->
+	 </div>
+    </div>
 	  <div class="row">
         <div class="col-12" id="vnos" style="display:none;">
-          <h1>VNESI PREGLED</h1>
+		  <form>
+            <div class="col-12">VNESITE NOVO SPOROČILO
+            </div>
+          </form>
+          <form method="post" action=".">
+            <div class="input-group">
+              <input class="form-control" type="prejID" name="prejID" placeholder="Prejemnik">
+              <span class="input-group-append">
+
+              </span>
+            </div>
+          </form>
+		  
+		  <form method="post" action=".">
+            <div class="input-group">
+              <input class="form-control" type="sporocilo" name="sporocilo" placeholder="Vsebina sporočila">
+              <span class="input-group-append">
+			  <!--
+                <button class="btn btn-primary" type="submit">
+                  <i class="fa fa-search"></i>
+                </button>
+				  -->
+              </span>
+            </div>
+          </form>
+
         </div>
+		<!-- Spodnji del je zgolj poiskušanje-->
+        <input type="button" value="Click Me!" onclick="submitForms()" />
       </div>
     </div>
     <!-- /.container-fluid-->
@@ -132,32 +169,18 @@
 	<script>
 	function myFunction() {
 		var x = document.getElementById("osnovna");
-		var y = document.getElementById("kartoteka");
-		var z = document.getElementById("vnos");
+		var y = document.getElementById("vnos");
 		x.style.display = "block";
 		y.style.display = "none";
-		z.style.display = "none";
 	}
 	</script>
 	<script>
 	function myFunction2() {
 		var x = document.getElementById("osnovna");
-		var y = document.getElementById("kartoteka");
-		var z = document.getElementById("vnos");
+		var y = document.getElementById("vnos");
 		var W = 
 		x.style.display = "none";
 		y.style.display = "block";
-		z.style.display = "none";
-	}
-	</script>
-	<script>
-	function myFunction3() {
-		var x = document.getElementById("osnovna");
-		var y = document.getElementById("kartoteka");
-		var z = document.getElementById("vnos");
-		x.style.display = "none";
-		y.style.display = "none";
-		z.style.display = "block";
 	}
 	</script>
     <script src="\static\vendor/jquery/jquery.min.js"></script>
