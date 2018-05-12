@@ -147,7 +147,7 @@ def index():
 
 @post("/index/")
 def kartoteka():
-    # iz vpsanega osebaID vrni tabelo diagnoz te osebe, razvrščene po datumu
+    # iz vpsanega osebaID vrni tabelo diagnoz te osebe, razvrscene po datumu
     ID = request.forms.ID
     curuser = get_user()
     c = baza.cursor()
@@ -190,15 +190,19 @@ def index_direktor():
 
 @get("/index/messenger/")
 def messenger():
-    '''Servira stran (na novi routi) z vsemi sporočili, tudi z vstavljanjem'''
+    '''Servira stran (na novi routi) z vsemi sporocili, tudi z vstavljanjem'''
     curuser = get_user()
+    if pooblastilo(curuser[0]) == 'raziskovalec':
+        redirect('/indexraziskovalec/')
+    elif pooblastilo(curuser[0]) == 'direktor':
+        redirect('/indexdirektor/')
     c = baza.cursor()
     c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
     tmp = c.fetchall()
-    return template("messenger.html", rows=tmp, user=curuser[0])
+    return template("messenger.html", rows=tmp, user=curuser[0], prejID=None, napaka=None)
     #return template("messenger.html", user=curuser[0])
 
 @post("/index/messenger/")
@@ -216,5 +220,4 @@ def novo_sporocilo():
 run(host='localhost', port=8080)
 
 
-#TODO: popravi login_post
-#TODO: popravi piskotke
+

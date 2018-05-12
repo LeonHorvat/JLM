@@ -106,7 +106,27 @@
 	  <div class="card mb-3">
         <div class="card-header">
           <i class="fa fa-commenting-o"></i> Sestavite novo sporočilo</div>
-          <form method="post" action=".">
+		  
+		<form role="form" method="post" action=".">
+			<label for="prejID">Prejemnik</label>
+			<input type="prejID" class="form-control" placeholder="Prejemnik"
+								   %if prejID:
+								   value="{{prejID}}"
+								   %end
+			name="prejID" required autofocus>
+			<label for="sporocilo">Sporočilo</label>
+			<input type="sporocilo" class="form-control" placeholder="Vnesi sporočilo" name="sporocilo" required>
+          
+			
+			<button type="submit" class="btn btn-primary btn-block">Pošlji</button>
+			<h5>
+							%if napaka is not None:
+									{{napaka}}
+							%end
+			</h5>
+		</form>
+		  
+         <!--  <form method="post" action=".">
             <div class="input-group">
               <input class="form-control" type="prejID" name="prejID" placeholder="Prejemnik">
               <span class="input-group-append" name="form1">
@@ -122,7 +142,7 @@
 
               </span>
             </div>
-          </form>
+          </form> -->
 	  
         </div>
       </div>
