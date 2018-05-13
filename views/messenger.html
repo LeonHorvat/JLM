@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>messenger</title>
+  <!-- Bootstrap core CSS-->
+  <link href="\static\vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom fonts for this template-->
+  <link href="\static\vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Page level plugin CSS-->
+  <link href="\static\vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
+  <!-- Custom styles for this template-->
+  <link href="\static\css/sb-admin.css" rel="stylesheet">
+</head>
+
+<body class="fixed-nav sticky-footer bg-dark" id="page-top">
+  <!-- Navigation-->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+    <a class="navbar-brand" onclick="myFunction()" href="/indexraziskovalec/">Sporočila</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Kartoteka">
+          <a class="nav-link" onclick="myFunction2()">
+            <i class="fa fa-fw fa-plus-square"></i>
+            <span class="nav-link-text">Ustvari novo</span>
+          </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
+          <a class="nav-link" onclick="myFunction()">
+            <i class="fa fa-fw fa-envelope-o"></i>
+            <span class="nav-link-text">Prejeta sporočila</span>
+          </a>
+        </li>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
+          <a class="nav-link" onclick="myFunction3()">
+            <i class="fa fa-fw fa-envelope-o"></i>
+            <span class="nav-link-text">Poslana sporočila</span>
+          </a>
+        </li>		
+      </ul>
+      <ul class="navbar-nav sidenav-toggler">
+        <li class="nav-item">
+          <a class="nav-link text-center" id="sidenavToggler">
+            <i class="fa fa-fw fa-angle-left"></i>
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0 mr-lg-2">
+            <div class="input-group">
+              <input class="form-control" type="text" placeholder="Search for...">
+              <span class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+          </form>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="modal" data-target="#exampleModal">
+            <i class="fa fa-fw fa-sign-out"></i>Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="content-wrapper">
+  <div class="container-fluid">
+      <!-- Breadcrumbs-->
+	<div class="row">
+     <div class="col-12" id="prejeta">
+	  <div class="card mb-3">
+        <div class="card-header">
+          <i class="fa fa-envelope-open-o"></i> Prejeta sporočila</div>
+        <div class="card-body">
+          <div class="table">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+				  <th>Pošiljatelj</th>
+                  <th>Datum</th>
+                  <th>Sporočilo</th>
+                </tr>
+              </thead>
+			  <tbody>  
+			  % for row in rows:
+				<tr>
+                  %for col in row:
+					<td>{{col}}</td>
+				  %end
+                </tr>
+			  %end
+			 </tbody>
+            </table>
+          </div>
+		  
+        </div>
+      </div>
+	 </div>
+    </div>
+	
+	<div class="row">
+     <div class="col-12" id="poslana" style="display:none;">
+	  <div class="card mb-3">
+        <div class="card-header">
+          <i class="fa fa-envelope-open-o"></i> Poslana sporočila</div>
+        <div class="card-body">
+          <div class="table">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+				  <th>Prejemnik</th>
+                  <th>Datum</th>
+                  <th>Sporočilo</th>
+                </tr>
+              </thead>
+			  <tbody>  
+			  % for row in rows_p:
+				<tr>
+                  %for col in row:
+					<td>{{col}}</td>
+				  %end
+                </tr>
+			  %end
+			 </tbody>
+            </table>
+          </div>
+		  
+        </div>
+      </div>
+	 </div>
+    </div>
+
+	  <div class="row">
+        <div class="col-12" id="vnos" style="display:none;">
+	  <div class="card mb-3">
+        <div class="card-header">
+          <i class="fa fa-commenting-o"></i> Sestavite novo sporočilo</div>		  
+		<form role="form" method="post" action=".">
+			<label for="prejID">Prejemnik</label>
+			<input type="prejID" class="form-control" placeholder="Prejemnik"
+								   %if prejID:
+								   value="{{prejID}}"
+								   %end
+			name="prejID" required autofocus>
+			<label for="sporocilo">Sporočilo</label>
+			<input type="sporocilo" class="form-control" placeholder="Vnesi sporočilo" name="sporocilo" required>
+          
+			
+			<button type="submit" class="btn btn-primary btn-block">Pošlji</button>
+			<h5>
+							%if napaka is not None:
+									{{napaka}}
+							%end
+			</h5>
+		</form>
+		  
+         <!--  <form method="post" action=".">
+
+            <div class="input-group">
+              <input class="form-control" type="prejID" name="prejID" placeholder="Prejemnik">
+              <span class="input-group-append" name="form1">
+
+              </span>
+            </div>
+          </form>
+		  
+		  <form method="post" action=".">
+            <div class="input-group">
+              <input class="form-control" type="sporocilo" name="sporocilo" placeholder="Vsebina sporočila">
+              <span class="input-group-append" name="form2">
+
+              </span>
+            </div>
+          </form> -->
+	  
+        </div>
+      </div>
+    </div>
+		 </div>
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+      <div class="container">
+        <div class="text-center">
+          <small>Copyright © Your Website 2018</small>
+        </div>
+      </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Logout Modal-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+            <a class="btn btn-primary" href="/logout/">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Bootstrap core JavaScript-->
+	<script>
+	function myFunction() {
+		var x = document.getElementById("prejeta");
+		var y = document.getElementById("vnos");
+		var z = document.getElementById("poslana");
+		x.style.display = "block";
+		y.style.display = "none";
+		z.style.display = "none";
+	}
+	</script>
+	<script>
+	function myFunction2() {
+		var x = document.getElementById("prejeta");
+		var y = document.getElementById("vnos");
+		var z = document.getElementById("poslana");
+		x.style.display = "none";
+		y.style.display = "block";
+		z.style.display = "none";
+	}
+	</script>
+	<script>
+	function myFunction3() {
+		var x = document.getElementById("prejeta");
+		var y = document.getElementById("vnos");
+		var z = document.getElementById("poslana");
+		x.style.display = "none";
+		y.style.display = "none";
+		z.style.display = "block";
+	}
+	</script>
+    <script src="\static\vendor/jquery/jquery.min.js"></script>
+    <script src="\static\vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="\static\vendor/jquery-easing/jquery.easing.min.js"></script>
+    <!-- Page level plugin JavaScript-->
+    <script src="\static\vendor/chart.js/Chart.min.js"></script>
+    <script src="\static\vendor/datatables/jquery.dataTables.js"></script>
+    <script src="\static\vendor/datatables/dataTables.bootstrap4.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="\static\js/sb-admin.min.js"></script>
+    <!-- Custom scripts for this page-->
+    <script src="\static\js/sb-admin-datatables.min.js"></script>
+    <script src="\static\js/sb-admin-charts.min.js"></script>
+  </div>
+</body>
+
+</html>

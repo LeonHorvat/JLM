@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS specializacija CASCADE;
 DROP TABLE IF EXISTS diagnoza CASCADE;
 DROP TABLE IF EXISTS bolezen CASCADE;
 DROP TABLE IF EXISTS zdravilo CASCADE;
+DROP TABLE IF EXISTS sporocila CASCADE;
 
 CREATE TABLE bolezen (
 	bolezenID TEXT PRIMARY KEY,
@@ -79,11 +80,11 @@ CREATE TABLE uporabnik (
 
 
 CREATE TABLE sporocila (
-	posiljateljID TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
-	prejemnikID TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
-	datum DATE DEFAULT now(),
-	vsebina TEXT NOT NULL,
-	prebrano BOOLEAN DEFAULT FALSE
+	posiljatelj TEXT NOT NULL REFERENCES uporabnik(username),
+	prejemnik TEXT NOT NULL REFERENCES uporabnik(username),
+	datum TIMESTAMP(0) DEFAULT now(),
+	vsebina TEXT NOT NULL
+	/* prebrano BOOLEAN DEFAULT FALSE */
 );
 
 
@@ -93,6 +94,9 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO jernejb;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO metodj;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO leonh;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO jernejb;
+GRANT ALL ON sporocila TO metodj;
+GRANT ALL ON sporocila TO leonh;
+GRANT ALL ON sporocila TO jernejb;
 
 
 
@@ -104,7 +108,7 @@ CREATE FUNCTION posodobitev() RETURNS trigger AS $posodobitev$
     BEGIN
         IF (NEW.diagnoza <> NULL) THEN
 			UPDATE pregled SET diagnoza = NEW.diagnoza 
-			WHERE pregled(oseba) = NEW.oseba AND pregled(diagnoza) = NULL;
+			WHERE oseba = NEW.oseba AND OLD.diagnoza = NULL;
 		END IF;
     END;
 $posodobitev$ LANGUAGE plpgsql;
