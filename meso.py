@@ -151,37 +151,64 @@ def kartoteka():
     ID = request.forms.ID
     curuser = get_user()
     c = baza.cursor()
-    if ID is not None:
-        c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
-                    JOIN oseba ON pregled.oseba = oseba.osebaID
-                    JOIN diagnoza
-                    JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
-                    ON pregled.diagnoza = diagnoza.diagnozaID
-                    WHERE oseba.osebaID = %s
-                    ORDER BY pregled.datum DESC""",
+    if ID != '':
+        if request.forms.Podrobno:
+            c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
+                         JOIN test ON pregled.testZdaj = test.testID
+                         JOIN oseba ON pregled.oseba = oseba.osebaID
+                         JOIN diagnoza 
+                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                         JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
+                         JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
+                         ON pregled.diagnoza = diagnoza.diagnozaID
+                         WHERE oseba.osebaID = %s
+                         ORDER BY pregled.datum""",
+                      [ID])
+
+        else:
+            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
+                        JOIN oseba ON pregled.oseba = oseba.osebaID
+                        JOIN diagnoza
+                        JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                        ON pregled.diagnoza = diagnoza.diagnozaID
+                        WHERE oseba.osebaID = %s
+                        ORDER BY pregled.datum""",
+                      [ID])
+
+        d = baza.cursor()
+        d.execute("""SELECT oseba.ime, oseba.priimek FROM oseba
+                    WHERE oseba.osebaID = %s""",
                   [ID])
-
-
+        ime_priimek = d.fetchone()
     else:
         #iz vpisanega imena, priimka in datuma rojstva vrni tabelo diagnoz te osebe, razvrščene po datumu
         ime = request.forms.ime
         priimek = request.forms.priimek
         rojstvo = request.forms.datum
-        c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
-                    JOIN oseba ON pregled.oseba = oseba.osebaID
-                    JOIN diagnoza
-                    JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
-                    ON pregled.diagnoza = diagnoza.diagnozaID
-                    WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
-                    ORDER BY pregled.datum DESC""",
-                  [ime, priimek, rojstvo])
-
+        if request.forms.Podrobno:
+            c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
+                         JOIN test ON pregled.testZdaj = test.testID
+                         JOIN oseba ON pregled.oseba = oseba.osebaID
+                         JOIN diagnoza 
+                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                         JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
+                         JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
+                         ON pregled.diagnoza = diagnoza.diagnozaID
+                         WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
+                         ORDER BY pregled.datum DESC""",
+                      [ime, priimek, rojstvo])
+        else:
+            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
+                        JOIN oseba ON pregled.oseba = oseba.osebaID
+                        JOIN diagnoza
+                        JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                        ON pregled.diagnoza = diagnoza.diagnozaID
+                        WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
+                        ORDER BY pregled.datum DESC""",
+                      [ime, priimek, rojstvo])
+            ime_priimek = ime + ' ' + priimek
     tmp = c.fetchall()
-    d = baza.cursor()
-    d.execute("""SELECT oseba.ime, oseba.priimek FROM oseba
-                WHERE oseba.osebaID = %s""",
-              [ID])
-    ime_priimek = d.fetchone()
+
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
         return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = False)

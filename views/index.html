@@ -149,13 +149,6 @@
   </nav>
   <div class="content-wrapper">
   <div class="container-fluid">
-      <!-- Breadcrumbs-->
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-          <a href="index.html">Dashboard</a>
-        </li>
-        <li class="breadcrumb-item active">Blank Page</li>
-      </ol>
       <div class="row">
         <div class="col-12" id="osnovna">
           <h1>ZDRAVNIK</h1>
@@ -163,64 +156,40 @@
       </div>
 	  <div class="row">
         <div class="col-12" id="kartoteka" style="display:none;">
-          <form>
-            <div class="col-12">Išči po ID-u pacienta
-            </div>
-          </form>
-          <form method="post" action=".">
-            <div class="input-group">
-              <input class="form-control" type="ID" name="ID" placeholder="ID pacienta">
-              <span class="input-group-append">
-                <button class="btn btn-primary" type="submit">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-          </form>
-		  <form>
-            <div class="col-12">Išči po imenu, priimku in rojstvu pacienta
-            </div>
-          </form>
-          <form method="post" action=".">
-            <div class="input-group">
-              <input class="form-control" type="ime" name="ime" placeholder="Ime pacienta">
-              <span class="input-group-append">
+		  <form role="form" method="post" action=".">
+			<label for="ID"> Išči po ID-u pacienta</label>
+			<input type="ID" class="form-control" placeholder="ID pacienta"
+			name="ID" required autofocus>
+			<button type="submit" class="btn btn-primary btn-block">Išči</button>
+		  </form>
+		  <form role="form" method="post" action=".">
+			<label for="ime"> Išči po imenu, priimku in datumu rojstva pacienta</label>
+			<input type="ime" class="form-control" placeholder="Ime"
+			name="ime" required autofocus>
+			<input type="priimek" class="form-control" placeholder="Priimek" 
+			name="priimek" required autofocus>
+			<input type="datum" class="form-control" placeholder="Datum rojstva YYYY-MM-DD" name="datum" required>
+			<button type="submit" class="btn btn-primary btn-block">Išči</button>
+		  </form>
+		  <div class="checkbox">
+			<label><input type="checkbox" name="podrobno" value="">Podrobno</label>
+		  </div>
 
-              </span>
-            </div>
-          </form>
-		  <form method="post" action=".">
-            <div class="input-group">
-              <input class="form-control" type="priimek" name="priimek" placeholder="Priimek pacienta">
-              <span class="input-group-append">
-
-              </span>
-            </div>
-          </form>
-		  <form method="post" action=".">
-            <div class="input-group">
-              <input class="form-control" type="datum" name="datum" placeholder="Datum rojstva">
-              <span class="input-group-append">
-                <button class="btn btn-primary" type="submit">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-          </form>
-        </div>
-      </div>
 	  <h5>
 		%if napaka is not None:
 			{{napaka}}
 		%end
 	  </h5>
+        </div>
+      </div>
 	  % if click:
+	  <div class="row" id="dataTable1">
 	  % for i in ime_priimek:
 		<h5>
 			{{i}}
 		</h5>
 	  % end
-	  <div class="card mb-3">
+	  <div class="card mb-3" id="dataTable1">
         <div class="card-header">
           <i class="fa fa-table"></i> Kartoteka</div>
         <div class="card-body">
@@ -246,6 +215,7 @@
         </div>
       </div>
 	  %end
+    </div>
     </div>
 	  <div class="row">
         <div class="col-12" id="vnos" style="display:none;">
@@ -290,9 +260,13 @@
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("kartoteka");
 		var z = document.getElementById("vnos");
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");		
 		x.style.display = "block";
 		y.style.display = "none";
 		z.style.display = "none";
+		W.style.display = "none";
+		Q.style.display = "none";
 	}
 	</script>
 	<script>
@@ -300,10 +274,13 @@
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("kartoteka");
 		var z = document.getElementById("vnos");
-		var W = 
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");
 		x.style.display = "none";
 		y.style.display = "block";
 		z.style.display = "none";
+		W.style.display = "none";
+		Q.style.display = "none";
 	}
 	</script>
 	<script>
@@ -311,12 +288,43 @@
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("kartoteka");
 		var z = document.getElementById("vnos");
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");
 		x.style.display = "none";
 		y.style.display = "none";
 		z.style.display = "block";
+		W.style.display = "none";
+		Q.style.display = "none";	}
+	</script>
+	<script>
+	function myFunction4() {
+		var x = document.getElementById("osnovna");
+		var y = document.getElementById("kartoteka");
+		var z = document.getElementById("vnos");
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");		
+		x.style.display = "none";
+		y.style.display = "none";
+		z.style.display = "none";
+		W.style.display = "block";
+		Q.style.display = "none";
 	}
 	</script>
-    <script src="\static\vendor/jquery/jquery.min.js"></script>
+	<script>
+	function myFunction5() {
+		var x = document.getElementById("osnovna");
+		var y = document.getElementById("kartoteka");
+		var z = document.getElementById("vnos");
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");		
+		x.style.display = "none";
+		y.style.display = "none";
+		z.style.display = "none";
+		W.style.display = "none";
+		Q.style.display = "block";
+	}
+	</script>    
+	<script src="\static\vendor/jquery/jquery.min.js"></script>
     <script src="\static\vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Core plugin JavaScript-->
     <script src="\static\vendor/jquery-easing/jquery.easing.min.js"></script>
