@@ -183,7 +183,7 @@
           </form>
           <form method="post" action=".">
             <div class="input-group">
-              <input class="form-control" type="ime" placeholder="Ime pacienta">
+              <input class="form-control" type="ime" name="ime" placeholder="Ime pacienta">
               <span class="input-group-append">
 
               </span>
@@ -191,7 +191,7 @@
           </form>
 		  <form method="post" action=".">
             <div class="input-group">
-              <input class="form-control" type="priimek" placeholder="Priimek pacienta">
+              <input class="form-control" type="priimek" name="priimek" placeholder="Priimek pacienta">
               <span class="input-group-append">
 
               </span>
@@ -199,9 +199,9 @@
           </form>
 		  <form method="post" action=".">
             <div class="input-group">
-              <input class="form-control" type="datum" placeholder="Rojstvo pacienta">
+              <input class="form-control" type="datum" name="datum" placeholder="Datum rojstva">
               <span class="input-group-append">
-                <button class="btn btn-primary" type="button">
+                <button class="btn btn-primary" type="submit">
                   <i class="fa fa-search"></i>
                 </button>
               </span>
@@ -209,8 +209,17 @@
           </form>
         </div>
       </div>
-	  
+	  <h5>
+		%if napaka is not None:
+			{{napaka}}
+		%end
+	  </h5>
 	  % if click:
+	  % for i in ime_priimek:
+		<h5>
+			{{i}}
+		</h5>
+	  % end
 	  <div class="card mb-3">
         <div class="card-header">
           <i class="fa fa-table"></i> Kartoteka</div>
