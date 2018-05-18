@@ -52,6 +52,8 @@ def password_md5(s):
     h.update(s.encode('utf-8'))
     return h.hexdigest()
 
+print(password_md5("mat555"))
+
 def get_user(auto_login = True, auto_redir=False):
     """Poglej cookie in ugotovi, kdo je prijavljeni uporabnik,
        vrni njegov username in ime. Ce ni prijavljen, presumeri
@@ -267,7 +269,21 @@ def index_direktor():
     elif pooblastilo(curuser[0]) == 'zdravnik':
         redirect('/index/')
     else:
-        return template("indexdirektor.html", user=curuser[0])
+        c = baza.cursor()
+        c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                        WHERE zahtevek.odobreno = %s
+                        ORDER BY zahtevek.datum DESC""",
+                  [False])
+        tmp = c.fetchall()
+        c1 = baza.cursor()
+        c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                        WHERE zahtevek.odobreno = %s
+                        ORDER BY zahtevek.datum DESC""",
+                  [True])
+        tmp1 = c1.fetchall()
+        return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
+
+    #TODO: post route za /indexdirektor/
 
 @get("/indexraziskovalec/")
 def index_direktor():
