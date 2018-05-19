@@ -74,12 +74,13 @@
      <div class="col-12" id="prejeta">
 	  <div class="card mb-3">
         <div class="card-header">
-          <i class="fa fa-envelope-open-o"></i> Prejeta sporočila</div>
+          <i class="fa fa-envelope-open-o"></i> Čakajoči zahtevki </div>
         <div class="card-body">
           <div class="table">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
               <thead>
                 <tr>
+				  <th>Izberi</th>
 				  <th>Uporabniško ime</th>
                   <th>Ime</th>
                   <th>Priimek</th>
@@ -90,6 +91,7 @@
 			  <tbody>  
 			  % for row in rows:
 				<tr>
+				 <td><div class="checkbox checkbox-success"><input type="checkbox" id="checkbox1" class="styled"><label></label></div></td>
                   %for col in row:
 					<td>{{col}}</td>
 				  %end
@@ -98,8 +100,17 @@
 			 </tbody>
             </table>
           </div>
-		  
         </div>
+		<form name="zavrni" class="form-inline my-2 my-lg-0 mr-lg-2" role="form" method="post" action=".">
+			<button name="zavrni" value="zavrni" type="submit" class="btn btn-primary btn-block">Zavrni</button> 
+			<!-- <input name="zavrni" type="submit" class="form-control" placeholder="zavrni" > -->
+		  </form>
+		  <br>
+		  <br>
+		  <form name="odobri" class="form-inline my-2 my-lg-0 mr-lg-2" role="form" method="post" action=".">
+			<button name="odobri" value="odobri" type="submit" class="btn btn-primary btn-block">Odobri</button>
+			<!-- <input name="odobri" type="submit" class="form-control" placeholder="Odobri" > -->
+		  </form>
       </div>
 	 </div>
     </div>
@@ -108,7 +119,7 @@
      <div class="col-12" id="poslana" style="display:none;">
 	  <div class="card mb-3">
         <div class="card-header">
-          <i class="fa fa-envelope-open-o"></i> Poslana sporočila</div>
+          <i class="fa fa-envelope-open-o"></i> Odobreni zahtevki </div>
         <div class="card-body">
           <div class="table">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -131,6 +142,10 @@
 			  %end
 			 </tbody>
             </table>
+			
+	
+	
+
           </div>
 		  
         </div>

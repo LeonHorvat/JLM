@@ -264,29 +264,38 @@ def kartoteka():
 @get("/indexdirektor/")
 def index_direktor():
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'zdravnik':
-        redirect('/index/')
-    else:
-        c = baza.cursor()
-        c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
-                        WHERE zahtevek.odobreno = %s
-                        ORDER BY zahtevek.datum DESC""",
-                  [False])
-        tmp = c.fetchall()
-        c1 = baza.cursor()
-        c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
-                        WHERE zahtevek.odobreno = %s
-                        ORDER BY zahtevek.datum DESC""",
-                  [True])
-        tmp1 = c1.fetchall()
-        return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
+    # if pooblastilo(curuser[0]) == 'raziskovalec':
+    #     redirect('/indexraziskovalec/')
+    # elif pooblastilo(curuser[0]) == 'zdravnik':
+    #     redirect('/index/')
+    # else:
+    c = baza.cursor()
+    c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                    WHERE zahtevek.odobreno = %s
+                    ORDER BY zahtevek.datum DESC""",
+              [False])
+    tmp = c.fetchall()
+    c1 = baza.cursor()
+    c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                    WHERE zahtevek.odobreno = %s
+                    ORDER BY zahtevek.datum DESC""",
+              [True])
+    tmp1 = c1.fetchall()
+    return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
+
+@post("/indexdirektor/")
+def index_direktor():
+    if (request.forms.get('zavrni') == "zavrni"):
+        print("zavrni")
+    if (request.forms.get('odobri') == "odobri"):
+        print("odobri")
+    redirect('/indexdirektor/')
+
 
     #TODO: post route za /indexdirektor/
 
 @get("/indexraziskovalec/")
-def index_direktor():
+def index_raziskovalec():
     curuser = get_user()
     if pooblastilo(curuser[0]) == 'zdravnik':
         redirect('/index/')
