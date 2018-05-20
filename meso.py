@@ -30,6 +30,9 @@ print(test('sgalea0'))
 #username: rdollarh
 #password: 7t6rIU
 
+#direktor testni zajcek
+#username: lhearse5i
+#password: lbfEDb
 
 ################
 #bottle uvod, pomozne funkcije
