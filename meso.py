@@ -152,7 +152,7 @@ def kartoteka():
     curuser = get_user()
     c = baza.cursor()
     if ID != '':
-        if request.forms.Podrobno:
+        if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
                          JOIN oseba ON pregled.oseba = oseba.osebaID
@@ -208,7 +208,7 @@ def kartoteka():
                       [ime, priimek, rojstvo])
             ime_priimek = ime + ' ' + priimek
     tmp = c.fetchall()
-
+    print(tmp)
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
         return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = False)
@@ -236,6 +236,54 @@ def index_direktor():
         redirect('/indexdirektor/')
     else:
         return template("indexraziskovalec.html", user=curuser[0])
+
+
+def vrni_prvi_stolpec(seznam):
+    #odstrani nepotrebne znake okrog besedila
+    nov = []
+    for i in seznam:
+        nov.append(i[0])
+    return nov
+
+@get("/index/pregled/")
+def pregled():
+    curuser = get_user()
+    if pooblastilo(curuser[0]) == 'raziskovalec':
+        redirect('/indexraziskovalec/')
+    elif pooblastilo(curuser[0]) == 'direktor':
+        redirect('/indexdirektor/')
+    else:
+        c = baza.cursor()
+        c.execute("""SELECT ime FROM test
+                    ORDER BY ime""")
+        test_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT DISTINCT ime FROM bolezen
+                    ORDER BY ime""")
+        diagnoza_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT DISTINCT ime FROM zdravilo
+                    ORDER BY ime""")
+        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
+        return template("pregled.html", user=curuser[0], napaka = None,
+                        test_seznam = test_seznam, diagnoza_seznam = diagnoza_seznam,
+                        zdravilo_seznam=zdravilo_seznam)
+
+@post("/index/pregled/")
+def pregled_post():
+    ID = request.forms.ID
+    curuser = get_user()
+    zdravnik = curuser[1]
+    testZdaj = request.forms.testZdaj
+    testNaprej = request.forms.testNaprej
+    izvid = request.forms.izvid
+    c = baza.cursor()
+    if testNaprej != "":
+        c.execute("""INSERT INTO """)
+    else:
+        diagnoza = request.forms.diagnoza
+        zdravilo = request.forms.zdravilo
+
+
+
 
 @get("/index/messenger/")
 def messenger():
