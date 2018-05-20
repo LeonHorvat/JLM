@@ -52,6 +52,8 @@ def password_md5(s):
     h.update(s.encode('utf-8'))
     return h.hexdigest()
 
+print(password_md5("mat555"))
+
 def get_user(auto_login = True, auto_redir=False):
     """Poglej cookie in ugotovi, kdo je prijavljeni uporabnik,
        vrni njegov username in ime. Ce ni prijavljen, presumeri
@@ -128,6 +130,48 @@ def login_post():
     #     response.set_cookie('username', username, path='/', secret=secret)
     #     redirect("/index/")
 
+@get("/register/")
+def login_get():
+    """Serviraj formo za login."""
+    curuser = get_user(auto_login = False, auto_redir = True)
+    return template("register.html", name=None, surname=None, institution=None, mail=None,napaka=None)
+
+@post("/register/")
+def nov_zahtevek():
+    ''' Vstavi novo sporocilo v tabelo sporocila.'''
+    username = request.forms.get('username')
+    name = request.forms.get('exampleInputName')
+    surname = request.forms.get('exampleInputName')
+    institution = request.forms.get('institution')
+    mail = request.forms.get('exampleInputEmail1')
+
+    #trenutno je tule mali bug, saj ce geslo vsebuje sumnik, se program zlomi
+    password = password_md5(request.forms.get('exampleInputPassword1'))
+    password2 = password_md5(request.forms.get('exampleConfirmPassword'))
+
+    #preverimo, ce je izbrani username ze zaseden
+    c1 = baza.cursor()
+    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+              [username])
+    tmp = c1.fetchone()
+    if tmp is not None:
+        return template("register.html", name=name,
+                        surname=surname, institution=institution, mail=mail, napaka="This username is already taken. Please choose another one.")
+
+    #preverimo, ali se gesli ujemata
+    if password != password2:
+        return template("register.html", name=name,
+                        surname=surname, institution=institution, mail=mail, napaka="Passwords do not match!")
+
+
+    #ce pridemo, do sem, je vse uredu in lahko vnesemo zahtevek v bazo
+    c = baza.cursor()
+    c.execute("""INSERT INTO zahtevek (username, ime, priimek, ustanova, mail, hash)
+                VALUES (%s, %s, %s, %s, %s, %s)""",
+              [username, name, surname, institution, mail, password])
+    return template("register.html", name = None,
+                    surname=None, institution=None, mail=None, napaka="Request sent successfully!")
+
 @get("/logout/")
 def logout():
     """Pobrisi cookie in preusmeri na login."""
@@ -181,7 +225,7 @@ def kartoteka():
                   [ID])
         ime_priimek = d.fetchone()
     else:
-        #iz vpisanega imena, priimka in datuma rojstva vrni tabelo diagnoz te osebe, razvrščene po datumu
+        #iz vpisanega imena, priimka in datuma rojstva vrni tabelo diagnoz te osebe, razvrscene po datumu
         ime = request.forms.ime
         priimek = request.forms.priimek
         rojstvo = request.forms.datum
@@ -220,15 +264,38 @@ def kartoteka():
 @get("/indexdirektor/")
 def index_direktor():
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'zdravnik':
-        redirect('/index/')
-    else:
-        return template("indexdirektor.html", user=curuser[0])
+    # if pooblastilo(curuser[0]) == 'raziskovalec':
+    #     redirect('/indexraziskovalec/')
+    # elif pooblastilo(curuser[0]) == 'zdravnik':
+    #     redirect('/index/')
+    # else:
+    c = baza.cursor()
+    c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                    WHERE zahtevek.odobreno = %s
+                    ORDER BY zahtevek.datum DESC""",
+              [False])
+    tmp = c.fetchall()
+    c1 = baza.cursor()
+    c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                    WHERE zahtevek.odobreno = %s
+                    ORDER BY zahtevek.datum DESC""",
+              [True])
+    tmp1 = c1.fetchall()
+    return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
+
+@post("/indexdirektor/")
+def index_direktor():
+    if (request.forms.get('zavrni') == "zavrni"):
+        print("zavrni")
+    if (request.forms.get('odobri') == "odobri"):
+        print("odobri")
+    redirect('/indexdirektor/')
+
+
+    #TODO: post route za /indexdirektor/
 
 @get("/indexraziskovalec/")
-def index_direktor():
+def index_raziskovalec():
     curuser = get_user()
     if pooblastilo(curuser[0]) == 'zdravnik':
         redirect('/index/')

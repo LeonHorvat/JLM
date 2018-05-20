@@ -87,6 +87,19 @@ CREATE TABLE sporocila (
 	/* prebrano BOOLEAN DEFAULT FALSE */
 );
 
+CREATE TABLE zahtevek (
+	username TEXT PRIMARY KEY,
+	hash TEXT NOT NULL,
+	ime TEXT NOT NULL,
+	priimek TEXT NOT NULL,
+	datum TIMESTAMP(0) DEFAULT now(),
+	ustanova TEXT NOT NULL,
+	mail TEXT NOT NULL,
+	odobreno BOOLEAN DEFAULT FALSE
+);
+
+ /* treba bo dodati trigger, ki bo posodobil odobreno v tabeli zahtevek*/
+
 
 GRANT ALL ON ALL TABLES IN SCHEMA public TO metodj;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO leonh;
