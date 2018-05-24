@@ -16,7 +16,7 @@ def test(posta):
     cur.execute('''
                     SELECT * FROM uporabnik WHERE username=%s
                 ''', [posta])
-    return (cur.fetchone())
+    return (cur.fetchall())
 
 print(test('sgalea0'))
 
@@ -195,7 +195,7 @@ def index():
 @post("/index/")
 def kartoteka():
     # Iz vpisanega osebaID vrni tabelo diagnoz te osebe, razvrscene po datumu.
-    # Če je obkljukano podrobno, vrne tabelo pregled.
+    # Ce je obkljukano podrobno, vrne tabelo pregled.
     ID = request.forms.ID
     curuser = get_user()
     c = baza.cursor()
@@ -273,35 +273,54 @@ def kartoteka():
 @get("/indexdirektor/")
 def index_direktor():
     curuser = get_user()
-    # if pooblastilo(curuser[0]) == 'raziskovalec':
-    #     redirect('/indexraziskovalec/')
-    # elif pooblastilo(curuser[0]) == 'zdravnik':
-    #     redirect('/index/')
-    # else:
-    c = baza.cursor()
-    c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
-                    WHERE zahtevek.odobreno = %s
-                    ORDER BY zahtevek.datum DESC""",
-              [False])
-    tmp = c.fetchall()
-    c1 = baza.cursor()
-    c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
-                    WHERE zahtevek.odobreno = %s
-                    ORDER BY zahtevek.datum DESC""",
-              [True])
-    tmp1 = c1.fetchall()
-    return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
+    if pooblastilo(curuser[0]) == 'raziskovalec':
+        redirect('/indexraziskovalec/')
+    elif pooblastilo(curuser[0]) == 'zdravnik':
+        redirect('/index/')
+    else:
+        c = baza.cursor()
+        c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                        WHERE zahtevek.odobreno = %s
+                        ORDER BY zahtevek.datum DESC""",
+                  [False])
+        tmp = c.fetchall()
+        c1 = baza.cursor()
+        c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                        WHERE zahtevek.odobreno = %s
+                        ORDER BY zahtevek.datum DESC""",
+                  [True])
+        tmp1 = c1.fetchall()
+        return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
 
 @post("/indexdirektor/")
 def index_direktor():
-    if (request.forms.get('zavrni') == "zavrni"):
-        print("zavrni")
-    if (request.forms.get('odobri') == "odobri"):
-        print("odobri")
+    if (str(request.params.type) == "zavrni"):
+        c1 = baza.cursor()
+        c1.execute("""DELETE FROM zahtevek
+                            WHERE zahtevek.username = %s""",
+                   [str(request.params.seznam)])
+    if (str(request.params.type) == "odobri"):
+        c2 = baza.cursor()
+        c2.execute("""UPDATE zahtevek SET odobreno = true
+                                WHERE zahtevek.username = %s""",
+                   [str(request.params.seznam)])
+        c3 = baza.cursor()
+        c3.execute("""SELECT username, hash FROM zahtevek WHERE zahtevek.username = %s""",
+                   [str(request.params.seznam)])
+        tmp = c3.fetchall()
+        c4 = baza.cursor()
+        c4.execute("""INSERT INTO uporabnik (username, hash, pooblastilo) VALUES (%s,%s,%s)""",
+                   [tmp[0][0], tmp[0][1], "raziskovalec"])
+
+    '''print(tmp)
+    print(request.params.get("seznam", type=str))
+    print(str(request.params.seznam))
+    print(str(request.params.type) == "zavrni")'''
+
     redirect('/indexdirektor/')
 
-
-    #TODO: post route za /indexdirektor/
+    #TODO: sedaj lahko oznaci samo enega na enkrat (bug pri request.params.get ...), popraviti to
+    #TODO: ob kliku na gumb se tabela ne posodi sama od sebe, je potrebno osveziti stran, popraviti to
 
 @get("/indexraziskovalec/")
 def index_raziskovalec():

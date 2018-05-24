@@ -91,7 +91,7 @@
 			  <tbody>  
 			  % for row in rows:
 				<tr>
-				 <td><div class="checkbox checkbox-success"><input type="checkbox" id="checkbox1" class="styled"><label></label></div></td>
+				 <td><div class="checkbox checkbox-success"><input name="checkbox_request" type="checkbox" id={{row[0]}} class="styled"><label></label></div></td>
                   %for col in row:
 					<td>{{col}}</td>
 				  %end
@@ -101,16 +101,15 @@
             </table>
           </div>
         </div>
-		<form name="zavrni" class="form-inline my-2 my-lg-0 mr-lg-2" role="form" method="post" action=".">
-			<button name="zavrni" value="zavrni" type="submit" class="btn btn-primary btn-block">Zavrni</button> 
+		
+			<button name="zavrni" value="zavrni" onclick="zavrni()" class="btn btn-primary btn-block">Zavrni</button> 
 			<!-- <input name="zavrni" type="submit" class="form-control" placeholder="zavrni" > -->
-		  </form>
+		 
 		  <br>
 		  <br>
-		  <form name="odobri" class="form-inline my-2 my-lg-0 mr-lg-2" role="form" method="post" action=".">
-			<button name="odobri" value="odobri" type="submit" class="btn btn-primary btn-block">Odobri</button>
-			<!-- <input name="odobri" type="submit" class="form-control" placeholder="Odobri" > -->
-		  </form>
+		  
+			<button name="odobri" value="odobri"  onclick="odobri()" class="btn btn-primary btn-block">Odobri</button>
+			
       </div>
 	 </div>
     </div>
@@ -201,6 +200,34 @@
 		var z = document.getElementById("poslana");
 		x.style.display = "none";
 		z.style.display = "block";
+	}
+	</script>
+	<script>
+	function zavrni() {
+		var oznaceni = $("input[name='checkbox_request']");
+		var idji = [];
+		for (var i = 0; i < oznaceni.length; i++) {
+			var oznacen = $(oznaceni[i])
+			if (oznacen.is(":checked")) {
+				idji.push(oznacen.attr('id'));
+				}
+		}
+		$.post("/indexdirektor/", {type: "zavrni", seznam: idji[0]})
+		console.log(idji)
+	}
+	</script>
+	<script>
+	function odobri() {
+		var oznaceni = $("input[name='checkbox_request']");
+		var idji = [];
+		for (var i = 0; i < oznaceni.length; i++) {
+			var oznacen = $(oznaceni[i])
+			if (oznacen.is(":checked")) {
+				idji.push(oznacen.attr('id'));
+				}
+		}
+		$.post("/indexdirektor/", {type: "odobri", seznam: idji[0]})
+		console.log(idji)
 	}
 	</script>
     <script src="\static\vendor/jquery/jquery.min.js"></script>
