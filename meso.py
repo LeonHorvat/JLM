@@ -194,11 +194,16 @@ def index():
 
 @post("/index/")
 def kartoteka():
-    # iz vpsanega osebaID vrni tabelo diagnoz te osebe, razvrscene po datumu
+    # Iz vpisanega osebaID vrni tabelo diagnoz te osebe, razvrscene po datumu.
+    # Če je obkljukano podrobno, vrne tabelo pregled.
     ID = request.forms.ID
     curuser = get_user()
     c = baza.cursor()
     if ID != '':
+        try:
+            int(ID)
+        except ValueError:
+            return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click=0)
         if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
@@ -257,7 +262,7 @@ def kartoteka():
     tmp = c.fetchall()
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
-        return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = False)
+        return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = 0)
     elif request.forms.podrobno == 'podrobno':
         return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 2, napaka = None, user=curuser[0])
     else:
@@ -362,7 +367,7 @@ def pregled_post():
                     VALUES ({0},'{1}','{2}',{3},'{4}','{5}');""".format(*vrstica1))
         c.execute("""INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) 
                     VALUES ('{0}',{1},'{2}');""".format(*vrstica2))
-        
+
     return template("index.html", user=curuser[0], click=0, napaka=None)
 
 
