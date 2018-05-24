@@ -104,16 +104,18 @@ def naredi_podatke_pregled(datoteka, username, pooblastilo):
             i = random.choice(st_pregledov)
             testNaprej = random.choice(testID)
             date = random.choice(datum)
+            oseba = random.choice(osebe)
             for k in range(i):
                 testZdaj = testNaprej
                 testNaprej = random.choice(testID)
-                vrstica = [random.choice(osebe), random.choice(zdravniki), testZdaj, testNaprej, j+1, 'NULL', date]
+                vrstica = [oseba, random.choice(zdravniki), testZdaj, testNaprej, j+1, 'NULL', date]
                 if k == i-1:
                     text_file.write(
                         "INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
                         "({0},'{1}','{2}',NULL,{4},{5},'{6}');".format(*vrstica))
-                text_file.write("INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
-                                "({0},'{1}','{2}','{3}',{4},{5},'{6}');".format(*vrstica))
+                else:
+                    text_file.write("INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES "
+                                    "({0},'{1}','{2}','{3}',{4},{5},'{6}');".format(*vrstica))
                 date = randomDate(date, "2018-5-5", random.random())
 
 pregled = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\pregled.txt'
