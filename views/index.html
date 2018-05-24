@@ -181,13 +181,13 @@
 	  </h5>
         </div>
       </div>
-	  % if click:
-	  <div class="row" id="dataTable1">
+	  % if click > 0:
 	  % for i in ime_priimek:
 		<h5>
 			{{i}}
 		</h5>
 	  % end
+	  % if click == 1:	  
 	  <div class="card mb-3" id="dataTable1">
         <div class="card-header">
           <i class="fa fa-table"></i> Kartoteka</div>
@@ -213,6 +213,8 @@
           </div>
         </div>
       </div>
+	  % end
+	  % if click == 2:	
 	  <div class="card mb-3" id="dataTable2">
         <div class="card-header">
           <i class="fa fa-table"></i> Kartoteka</div>
@@ -243,8 +245,8 @@
           </div>
         </div>
       </div>	  
-	  %end
-    </div>
+	  % end
+	  % end
       <div class="row">
         <div class="col-12" id="vnos" style="display:none;">
           <h1>VNESI PREGLED</h1>
@@ -296,6 +298,7 @@
 		z.style.display = "none";
 		W.style.display = "none";
 		Q.style.display = "none";
+		click = 0;
 	}
 	</script>
 	<script>

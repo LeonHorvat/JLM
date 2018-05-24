@@ -190,7 +190,7 @@ def index():
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
     else:
-        return template("index.html", user=curuser[0], click = False, napaka = None)
+        return template("index.html", user=curuser[0], click = 0, napaka = None)
 
 @post("/index/")
 def kartoteka():
@@ -232,7 +232,7 @@ def kartoteka():
         ime = request.forms.ime
         priimek = request.forms.priimek
         rojstvo = request.forms.datum
-        if request.forms.Podrobno:
+        if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
                          JOIN oseba ON pregled.oseba = oseba.osebaID
@@ -255,12 +255,13 @@ def kartoteka():
                       [ime, priimek, rojstvo])
             ime_priimek = ime + ' ' + priimek
     tmp = c.fetchall()
-    print(tmp)
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
         return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = False)
+    elif request.forms.podrobno == 'podrobno':
+        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 2, napaka = None, user=curuser[0])
     else:
-        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = True, napaka = None, user=curuser[0])
+        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 1, napaka = None, user=curuser[0])
 
 
 
@@ -345,13 +346,24 @@ def pregled_post():
     testZdaj = request.forms.testZdaj
     testNaprej = request.forms.testNaprej
     izvid = request.forms.izvid
+    if izvid == '':
+        izvid = 'NULL'
     c = baza.cursor()
     if testNaprej != "":
-        c.execute("""INSERT INTO """)
+        vrstica = [ID, zdravnik, testZdaj, testNaprej, izvid]
+        c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,izvid)
+                    VALUES ({0},'{1}','{2}','{3}','{4}');""".format(*vrstica))
     else:
         diagnoza = request.forms.diagnoza
         zdravilo = request.forms.zdravilo
-
+        vrstica1 = [ID, zdravnik, testZdaj, 'NULL', diagnoza, izvid]
+        vrstica2 = [diagnoza, zdravilo, zdravnik]
+        c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,diagnoza,izvid)
+                    VALUES ({0},'{1}','{2}',{3},'{4}','{5}');""".format(*vrstica1))
+        c.execute("""INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) 
+                    VALUES ('{0}',{1},'{2}');""".format(*vrstica2))
+        
+    return template("index.html", user=curuser[0], click=0, napaka=None)
 
 
 
