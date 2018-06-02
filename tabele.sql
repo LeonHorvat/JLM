@@ -128,6 +128,29 @@ $posodobitev$ LANGUAGE plpgsql;
 
 CREATE TRIGGER posodobitev AFTER INSERT ON pregled
     FOR EACH ROW EXECUTE PROCEDURE posodobitev();
+	
+/* DEMO - test za trigger */
+
+DROP TABLE IF EXISTS pregled CASCADE;
+CREATE TABLE pregled (
+    pregledID SERIAL PRIMARY KEY,
+	oseba INTEGER NOT NULL REFERENCES oseba(osebaID),
+	zdravnik TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
+	testZdaj TEXT NOT NULL REFERENCES test(testID),
+	testNaprej TEXT REFERENCES test(testID) DEFAULT NULL,
+	diagnoza INTEGER REFERENCES diagnoza(diagnozaID) DEFAULT NULL,
+	izvid TEXT,
+	datum DATE DEFAULT now(), 
+	CONSTRAINT napoved_pregleda CHECK (datum <= now()),
+	CONSTRAINT brez_diagnoze_in_napotnice CHECK (testNaprej IS NOT NULL OR diagnoza IS NOT NULL)
+);
+GRANT ALL ON pregled TO metodj;
+GRANT ALL ON pregled TO leonh;
+GRANT ALL ON pregled TO jernejb;
+
+INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES (659,'ggrealy3m','2092','1068',NULL,NULL,'2011-06-09');
+INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES (310,'ggrealy3m','2092','1068',NULL,NULL,'2011-06-09');
+INSERT INTO pregled(oseba,zdravnik, testZdaj,testNaprej, diagnoza, izvid, datum) VALUES (659,'sellwell35','2092',NULL,1,NULL,'2011-06-09'); /*Tu bi moralo posoboditi prvega, drugega pa na*/
 
 /* ============ KOPIRAJ LE DO TU, KODA SPODAJ ŠE NE DELUJE ============ */
 
