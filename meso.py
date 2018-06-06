@@ -21,6 +21,7 @@ def test(posta):
 print(test('sgalea0'))
 
 
+
 #zdravnik testni zajcek
 #username: sgalea0
 #password: wXNoal
@@ -218,7 +219,7 @@ def kartoteka():
                       [ID])
 
         else:
-            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
+            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime FROM pregled
                         JOIN oseba ON pregled.oseba = oseba.osebaID
                         JOIN diagnoza
                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
@@ -352,6 +353,14 @@ def pregled():
         c.execute("""SELECT ime FROM test
                     ORDER BY ime""")
         test_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT ime FROM test
+                    JOIN specializacija ON test.testid = specializacija.test
+                    WHERE zdravnik = %s
+                    ORDER BY ime""",
+                    [curuser[0]])
+
+        test_seznam2 = vrni_prvi_stolpec(c.fetchall())
+
         c.execute("""SELECT DISTINCT ime FROM bolezen
                     ORDER BY ime""")
         diagnoza_seznam = vrni_prvi_stolpec(c.fetchall())
@@ -359,35 +368,54 @@ def pregled():
                     ORDER BY ime""")
         zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
         return template("pregled.html", user=curuser[0], napaka = None,
-                        test_seznam = test_seznam, diagnoza_seznam = diagnoza_seznam,
+                        test_seznam = test_seznam,
+                        test_seznam2=test_seznam2,diagnoza_seznam = diagnoza_seznam,
                         zdravilo_seznam=zdravilo_seznam)
 
 @post("/index/pregled/")
 def pregled_post():
     ID = request.forms.ID
     curuser = get_user()
-    zdravnik = curuser[1]
-    testZdaj = request.forms.testZdaj
-    testNaprej = request.forms.testNaprej
+    zdravnik = curuser[0]
+
+    c = baza.cursor()
+    c.execute("""SELECT testid FROM test
+                WHERE ime = %s""",
+                [request.forms.testZdaj])
+    testZdaj = c.fetchone()[0]
+
     izvid = request.forms.izvid
     if izvid == '':
         izvid = 'NULL'
     c = baza.cursor()
-    if testNaprej != "":
+    if request.forms.testNaprej != "":
+        c.execute("""SELECT testid FROM test
+                    WHERE ime = %s""",
+                  [request.forms.testNaprej])
+        testNaprej = c.fetchone()[0]
         vrstica = [ID, zdravnik, testZdaj, testNaprej, izvid]
         c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,izvid)
                     VALUES ({0},'{1}','{2}','{3}','{4}');""".format(*vrstica))
     else:
-        diagnoza = request.forms.diagnoza
-        zdravilo = request.forms.zdravilo
-        vrstica1 = [ID, zdravnik, testZdaj, 'NULL', diagnoza, izvid]
+        c.execute("""SELECT bolezenid FROM bolezen
+                    WHERE ime = %s""",
+                  [request.forms.diagnoza])
+        diagnoza = c.fetchone()[0]
+        c.execute("""SELECT zdraviloid FROM zdravilo
+                    WHERE ime = %s""",
+                  [request.forms.zdravilo])
+        zdravilo = c.fetchone()[0]
         vrstica2 = [diagnoza, zdravilo, zdravnik]
-        c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,diagnoza,izvid)
-                    VALUES ({0},'{1}','{2}',{3},'{4}','{5}');""".format(*vrstica1))
         c.execute("""INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) 
-                    VALUES ('{0}',{1},'{2}');""".format(*vrstica2))
-
-    return template("index.html", user=curuser[0], click=0, napaka=None)
+                    VALUES ('{0}','{1}','{2}');""".format(*vrstica2))
+        c.execute("""SELECT diagnozaid FROM diagnoza
+                    ORDER BY diagnozaid DESC
+                    LIMIT 1;""")
+        diagnozaid = c.fetchone()[0]
+        vrstica1 = [ID, zdravnik, testZdaj, 'NULL', diagnozaid, izvid]
+        c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,diagnoza,izvid)
+                    VALUES ({0},'{1}','{2}',{3},{4},'{5}');""".format(*vrstica1))
+    redirect('/index/')
 
 
 

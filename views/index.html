@@ -157,20 +157,35 @@
 	  <div class="row">
         <div class="col-12" id="kartoteka" style="display:none;">	
 		  <form role="form" method="post" action=".">
-			<label for="ID"> Išči po ID-u pacienta</label>
-			<label><input type="checkbox" name="podrobno" value="podrobno">Podrobno</label>
-			<input type="ID" class="form-control" placeholder="ID pacienta"
-			name="ID" required autofocus>
+			<div class="form-group">
+				<label for="ID"> Išči po ID-u pacienta:</label>
+			</div>
+			<div class="form-group">
+				<label><input type="checkbox" name="podrobno" value="podrobno">   Podrobno</label>
+				<input type="ID" class="form-control" placeholder="ID pacienta"
+				name="ID" required autofocus>
+			</div>	
 			<button type="submit" class="btn btn-primary btn-block" onclick="myFunction4()">Išči</button>
 		  </form>
+		  <div class="col-xs-12" style="height:50px;"></div>
 		  <form role="form" method="post" action=".">
-			<label for="ime"> Išči po imenu, priimku in datumu rojstva pacienta</label>
-			<label><input type="checkbox" name="podrobno" value="podrobno">Podrobno</label>
-			<input type="ime" class="form-control" placeholder="Ime"
-			name="ime" required autofocus>
-			<input type="priimek" class="form-control" placeholder="Priimek" 
-			name="priimek" required autofocus>
-			<input type="datum" class="form-control" placeholder="Datum rojstva YYYY-MM-DD" name="datum" required>
+			<div class="form-group">
+				<label for="ime"> Išči po imenu, priimku in datumu rojstva pacienta</label>
+			</div>
+			<div class="form-group">
+				<label><input type="checkbox" name="podrobno" value="podrobno">   Podrobno</label>
+			</div>
+			<div class="form-group">
+				<input type="ime" class="form-control" placeholder="Ime"
+				name="ime" required autofocus>
+			</div>
+			<div class="form-group">
+				<input type="priimek" class="form-control" placeholder="Priimek" 
+				name="priimek" required autofocus>
+			</div>
+			<div class="form-group">	
+				<input type="datum" class="form-control" placeholder="Datum rojstva YYYY-MM-DD" name="datum" required>
+			</div>
 			<button type="submit" class="btn btn-primary btn-block">Išči</button>
 		  </form>
 		</div>

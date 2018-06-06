@@ -154,50 +154,60 @@
           <h1>VNOS PREGLEDA</h1>
         </div>
     </div>
-	<div class="row">
-        <div class="col-12">	
-		  <form role="form" method="post" action=".">
+        	
+		<form role="form" method="post" action=".">
+		  <div class="form-group">
 			<label for="ID"> ID pacienta</label>
 			<input type="ID" class="form-control" placeholder="ID pacienta"
 			name="ID" required autofocus>
+		</div>
+		<div class="form-group">
 			<label for="testZdaj"> Šifra opravljenega testa</label>
-			<select type="testZdaj" class="selectpicker" placeholder="Opravljen test"
-			name="testZdaj">
+			<select type="testZdaj" class="form-control" placeholder="Opravljen test"
+			name="testZdaj" required autofocus>
 				<option></option>
-				% for i in test_seznam:
+				% for i in test_seznam2:
 					<option>{{i}}</option>
 				% end
 			</select>
-			<label for="testNaprej"> Šifra naslednjega testa (Če je postavljena diagnoza, pustite prazno.)</label>
-			<select type="testNaprej" class="selectpicker" placeholder="Naslednji test" 
+		</div>
+		<div class="form-group">
+			<label for="testNaprej"> Šifra naslednjega testa</label>
+			<select type="testNaprej" class="form-control" placeholder="Naslednji test" 
 			name="testNaprej">
 				<option></option>
 				% for i in test_seznam:
 					<option>{{i}}</option>
 				% end
 			</select>
+			 <small id="opozorilo" class="form-text text-muted">Če je postavljena diagnoza, pustite prazno.</small>
+		</div>
+		<div class="form-group">	
 			<label for="izvid"> Izvid</label>
-			<input type="izvid" class="form-control" placeholder="izvid" 
+			<input type="izvid" class="form-control" placeholder="Izvid" 
 			name="izvid">
 			<label for="diagnoza"> Diagnoza</label>
-			<select type="diagnoza" class="selectpicker" placeholder="Diagnoza" 
-			name="diagnoza" required autofocus>	
+			<select type="diagnoza" class="form-control" placeholder="Diagnoza" 
+			name="diagnoza">	
 				<option></option>
 				% for i in diagnoza_seznam:
 					<option>{{i}}</option>
 				% end
-			</select>	
+			</select>
+		</div>
+		<div class="form-group">	
 			<label for="zdravilo"> Zdravilo</label>
-			<select type="zdravilo" class="selectpicker" placeholder="zdravilo" 
-			name="diagnoza" required autofocus>	
+			<select type="zdravilo" class="form-control" placeholder="zdravilo" 
+			name="zdravilo">	
 				<option></option>
 				% for i in zdravilo_seznam:
 					<option>{{i}}</option>
 				% end
-			</select>	
+			</select>
+		</div>	
 			<button type="submit" class="btn btn-primary btn-block">Končano</button>
 		  </form>
-		</div>
+		
 	</div>
   </div>
   </div>	
