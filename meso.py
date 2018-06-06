@@ -185,12 +185,19 @@ def logout():
 @get("/index/")
 def index():
     curuser = get_user()
+    c1 = baza.cursor()
+    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+    tmp1 = c1.fetchall()
     if pooblastilo(curuser[0]) == 'raziskovalec':
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
     else:
-        return template("index.html", user=curuser[0], click = 0, napaka = None)
+        return template("index.html", rows_spor = tmp1, user=curuser[0], click = 0, napaka = None)
 
 @post("/index/")
 def kartoteka():
@@ -264,9 +271,9 @@ def kartoteka():
         # ID osebe v bazi ne obstaja
         return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = 0)
     elif request.forms.podrobno == 'podrobno':
-        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 2, napaka = None, user=curuser[0])
+        return template("index.html", rows=tmp, rows_spor=tmp1, ime_priimek = ime_priimek, click = 2, napaka = None, user=curuser[0])
     else:
-        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 1, napaka = None, user=curuser[0])
+        return template("index.html", rows=tmp, rows_spor=tmp1, ime_priimek = ime_priimek, click = 1, napaka = None, user=curuser[0])
 
 
 
