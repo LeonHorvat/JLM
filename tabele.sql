@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS diagnoza CASCADE;
 DROP TABLE IF EXISTS bolezen CASCADE;
 DROP TABLE IF EXISTS zdravilo CASCADE;
 DROP TABLE IF EXISTS sporocila CASCADE;
+DROP TABLE IF EXISTS uporabnik CASCADE;
+DROP TABLE IF EXISTS zahtevek CASCADE;
 
 CREATE TABLE bolezen (
 	bolezenID TEXT PRIMARY KEY,
@@ -40,7 +42,6 @@ CREATE TABLE oseba (
 	teza DECIMAL NOT NULL,
 	visina DECIMAL NOT NULL,
 	osebniZdravnik TEXT NOT NULL REFERENCES zdravnik(zdravnikID),
-	CONSTRAINT sam_svoj_zdravnik CHECK (/* TODO*/),
 	CONSTRAINT napoved_rojstva CHECK (rojstvo <= now()),
 	CONSTRAINT nepozitivna_teza CHECK (teza > 0),
 	CONSTRAINT nepozitivna_visina CHECK (visina > 0)
@@ -114,19 +115,18 @@ GRANT ALL ON sporocila TO jernejb;
 
 
 /* preveri če deluje - vprašljiva funkcionalnost*/
-DROP TRIGGER IF EXISTS posodobitev ON pregled CASCADE;
+DROP TRIGGER IF EXISTS posodobi ON diagnoza CASCADE;
 DROP FUNCTION IF EXISTS posodobitev();
 
 CREATE FUNCTION posodobitev() RETURNS trigger AS $posodobitev$
     BEGIN
-        IF (NEW.diagnoza <> NULL) THEN
-			UPDATE pregled SET diagnoza = NEW.diagnoza 
-			WHERE oseba = NEW.oseba AND OLD.diagnoza = NULL;
-		END IF;
+		
+		UPDATE pregled SET diagnoza = NEW.diagnozaid 
+		WHERE oseba = NEW.oseba AND OLD.diagnoza = NULL;
     END;
 $posodobitev$ LANGUAGE plpgsql;
 
-CREATE TRIGGER posodobitev AFTER INSERT ON pregled
+CREATE TRIGGER posodobi AFTER INSERT ON diagnoza
     FOR EACH ROW EXECUTE PROCEDURE posodobitev();
 	
 /* DEMO - test za trigger */

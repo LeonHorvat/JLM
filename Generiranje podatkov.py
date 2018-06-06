@@ -97,7 +97,7 @@ randomDate("2018-1-1", "2018-2-2", random.random())
 def naredi_podatke_pregled(datoteka, username, pooblastilo):
     # generira INSERT SQL stavke za tabelo pregled in jih zapise v datoteko
     zdravniki = username_zdravnik(username, pooblastilo)
-    osebe = [i + 2 for i in range(1000)]
+    osebe = [i + 1 for i in range(1000)]
     st_pregledov = [1,2,3,4,5,6]
     with open(datoteka, "w") as text_file:
         for j in range(10000): #enako številu diagnoz
