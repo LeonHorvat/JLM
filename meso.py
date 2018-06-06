@@ -186,12 +186,19 @@ def logout():
 @get("/index/")
 def index():
     curuser = get_user()
+    c1 = baza.cursor()
+    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+    tmp1 = c1.fetchall()
     if pooblastilo(curuser[0]) == 'raziskovalec':
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
     else:
-        return template("index.html", user=curuser[0], click = 0, napaka = None)
+        return template("index.html", rows_spor = tmp1, user=curuser[0], click = 0, napaka = None)
 
 @post("/index/")
 def kartoteka():
@@ -204,7 +211,7 @@ def kartoteka():
         try:
             int(ID)
         except ValueError:
-            return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click=0)
+            return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", rows_spor = None, user=curuser[0], click=0)
         if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
@@ -263,11 +270,11 @@ def kartoteka():
     tmp = c.fetchall()
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
-        return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", user=curuser[0], click = 0)
+        return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", rows_spor = None, user=curuser[0], click = 0)
     elif request.forms.podrobno == 'podrobno':
-        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 2, napaka = None, user=curuser[0])
+        return template("index.html", rows=tmp, rows_spor=None, ime_priimek = ime_priimek, click = 2, napaka = None, user=curuser[0])
     else:
-        return template("index.html", rows=tmp, ime_priimek = ime_priimek, click = 1, napaka = None, user=curuser[0])
+        return template("index.html", rows=tmp, rows_spor=None, ime_priimek = ime_priimek, click = 1, napaka = None, user=curuser[0])
 
 
 
@@ -448,6 +455,26 @@ def novo_sporocilo():
     prejID = request.forms.get('prejID')
     sporocilo = request.forms.get('sporocilo')
     curuser = get_user()
+    c1 = baza.cursor()
+    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+              [prejID])
+    tmp_preveri = c1.fetchone()
+    c2 = baza.cursor()
+    c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp = c2.fetchall()
+    c3 = baza.cursor()
+    c3.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.posiljatelj = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp1 = c3.fetchall()
+
+    if tmp_preveri is None:
+        return template("messenger.html",
+                               rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka="Ta prejemnik ne obstaja!")
     c = baza.cursor()
     c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
                 VALUES (%s, %s, %s)""",
