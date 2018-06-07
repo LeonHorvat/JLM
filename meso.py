@@ -355,6 +355,13 @@ def vrni_prvi_stolpec(seznam):
 @get("/index/pregled/")
 def pregled():
     curuser = get_user()
+    c_spor = baza.cursor()
+    c_spor.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+    tmp_spor = c_spor.fetchall()
     if pooblastilo(curuser[0]) == 'raziskovalec':
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
@@ -381,7 +388,8 @@ def pregled():
         return template("pregled.html", user=curuser[0], napaka = None,
                         test_seznam = test_seznam,
                         test_seznam2=test_seznam2,diagnoza_seznam = diagnoza_seznam,
-                        zdravilo_seznam=zdravilo_seznam)
+                        zdravilo_seznam=zdravilo_seznam,
+                        rows_spor = tmp_spor)
 
 @post("/index/pregled/")
 def pregled_post():
