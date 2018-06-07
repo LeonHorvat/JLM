@@ -464,8 +464,8 @@ def messenger():
 @post("/index/messenger/")
 def novo_sporocilo():
     ''' Vstavi novo sporocilo v tabelo sporocila.'''
-    prejID = request.forms.get('prejID')
-    sporocilo = request.forms.get('sporocilo')
+    prejID = request.forms.prejID
+    sporocilo = request.forms.sporocilo
     curuser = get_user()
     c1 = baza.cursor()
     c1.execute("SELECT * FROM uporabnik WHERE username=%s",
