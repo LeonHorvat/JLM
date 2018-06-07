@@ -143,15 +143,15 @@ def login_get():
 @post("/register/")
 def nov_zahtevek():
     ''' Vstavi novo sporocilo v tabelo sporocila.'''
-    username = request.forms.get('username')
-    name = request.forms.get('exampleInputName')
-    surname = request.forms.get('exampleInputName')
-    institution = request.forms.get('institution')
-    mail = request.forms.get('exampleInputEmail1')
+    username = request.forms.username
+    name = request.forms.exampleInputName
+    surname = request.forms.exampleInputLastName
+    institution = request.forms.institution
+    mail = request.forms.exampleInputEmail1
 
     #trenutno je tule mali bug, saj ce geslo vsebuje sumnik, se program zlomi
-    password = password_md5(request.forms.get('exampleInputPassword1'))
-    password2 = password_md5(request.forms.get('exampleConfirmPassword'))
+    password = password_md5(request.forms.exampleInputPassword1)
+    password2 = password_md5(request.forms.exampleConfirmPassword)
 
     #preverimo, ce je izbrani username ze zaseden
     c1 = baza.cursor()
