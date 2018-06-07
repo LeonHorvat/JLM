@@ -328,7 +328,11 @@ def index_direktor():
     redirect('/indexdirektor/')
 
     #TODO: sedaj lahko oznaci samo enega na enkrat (bug pri request.params.get ...), popraviti to
+
     #TODO: ob kliku na gumb se tabela ne posodi sama od sebe, je potrebno osveziti stran, popraviti to
+    #update: sedaj se stran osvezi ob kliku na gumb (samo potrebno je bilo sprementi parameter v location.reload()
+    # na true. Ni sicer najlepsa resitev, lepse bi bilo, ce bi se tabele na strani posodobile, brez osvezitve strani.
+    # Za to bi bilo potrebno bolj podrobno pogledati jquery.
 
 @get("/indexraziskovalec/")
 def index_raziskovalec():
