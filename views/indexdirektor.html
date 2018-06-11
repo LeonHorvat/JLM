@@ -214,6 +214,8 @@
 		}
 		$.post("/indexdirektor/", {type: "zavrni", seznam: idji[0]})
 		console.log(idji)
+		location.reload(true)
+		alert("Uspešno zavrnjen zahtevek!");
 	}
 	</script>
 	<script>
@@ -228,6 +230,8 @@
 		}
 		$.post("/indexdirektor/", {type: "odobri", seznam: idji[0]})
 		console.log(idji)
+		location.reload(true)
+		alert("Uspešno odobren zahtevek!");
 	}
 	</script>
     <script src="\static\vendor/jquery/jquery.min.js"></script>

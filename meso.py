@@ -143,15 +143,15 @@ def login_get():
 @post("/register/")
 def nov_zahtevek():
     ''' Vstavi novo sporocilo v tabelo sporocila.'''
-    username = request.forms.get('username')
-    name = request.forms.get('exampleInputName')
-    surname = request.forms.get('exampleInputName')
-    institution = request.forms.get('institution')
-    mail = request.forms.get('exampleInputEmail1')
+    username = request.forms.username
+    name = request.forms.exampleInputName
+    surname = request.forms.exampleInputLastName
+    institution = request.forms.institution
+    mail = request.forms.exampleInputEmail1
 
     #trenutno je tule mali bug, saj ce geslo vsebuje sumnik, se program zlomi
-    password = password_md5(request.forms.get('exampleInputPassword1'))
-    password2 = password_md5(request.forms.get('exampleConfirmPassword'))
+    password = password_md5(request.forms.exampleInputPassword1)
+    password2 = password_md5(request.forms.exampleConfirmPassword)
 
     #preverimo, ce je izbrani username ze zaseden
     c1 = baza.cursor()
@@ -340,7 +340,11 @@ def index_direktor():
     redirect('/indexdirektor/')
 
     #TODO: sedaj lahko oznaci samo enega na enkrat (bug pri request.params.get ...), popraviti to
+
     #TODO: ob kliku na gumb se tabela ne posodi sama od sebe, je potrebno osveziti stran, popraviti to
+    #update: sedaj se stran osvezi ob kliku na gumb (samo potrebno je bilo sprementi parameter v location.reload()
+    # na true. Ni sicer najlepsa resitev, lepse bi bilo, ce bi se tabele na strani posodobile, brez osvezitve strani.
+    # Za to bi bilo potrebno bolj podrobno pogledati jquery.
 
 @get("/indexraziskovalec/")
 def index_raziskovalec():
@@ -363,6 +367,13 @@ def vrni_prvi_stolpec(seznam):
 @get("/index/pregled/")
 def pregled():
     curuser = get_user()
+    c_spor = baza.cursor()
+    c_spor.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+    tmp_spor = c_spor.fetchall()
     if pooblastilo(curuser[0]) == 'raziskovalec':
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
@@ -389,7 +400,8 @@ def pregled():
         return template("pregled.html", user=curuser[0], napaka = None,
                         test_seznam = test_seznam,
                         test_seznam2=test_seznam2,diagnoza_seznam = diagnoza_seznam,
-                        zdravilo_seznam=zdravilo_seznam)
+                        zdravilo_seznam=zdravilo_seznam,
+                        rows_spor = tmp_spor)
 
 @post("/index/pregled/")
 def pregled_post():
@@ -464,8 +476,8 @@ def messenger():
 @post("/index/messenger/")
 def novo_sporocilo():
     ''' Vstavi novo sporocilo v tabelo sporocila.'''
-    prejID = request.forms.get('prejID')
-    sporocilo = request.forms.get('sporocilo')
+    prejID = request.forms.prejID
+    sporocilo = request.forms.sporocilo
     curuser = get_user()
     c1 = baza.cursor()
     c1.execute("SELECT * FROM uporabnik WHERE username=%s",
