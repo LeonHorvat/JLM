@@ -207,7 +207,7 @@ def logout():
 def index():
     curuser = get_user()
     c1 = baza.cursor()
-    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    c1.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
@@ -330,7 +330,14 @@ def index_direktor():
                         ORDER BY zahtevek.datum DESC""",
                   [True])
         tmp1 = c1.fetchall()
-        return template("indexdirektor.html", rows=tmp, rows_p=tmp1, user=curuser[0], napaka=None)
+        c2 = baza.cursor()
+        c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                    WHERE sporocila.prejemnik = %s
+                    ORDER BY sporocila.datum DESC
+                    LIMIT 3""",
+                  [curuser[0]])
+        tmp2 = c2.fetchall()
+        return template("indexdirektor.html", rows=tmp, rows_p=tmp1, rows_spor=tmp2, user=curuser[0], napaka=None)
 
 @post("/indexdirektor/")
 def index_direktor():
@@ -381,7 +388,7 @@ def index_raziskovalec():
         redirect('/indexdirektor/')
     else:
         c = baza.cursor()
-        c.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+        c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
@@ -603,6 +610,117 @@ def novo_sporocilo():
                 VALUES (%s, %s, %s)""",
               [curuser[0], prejID, sporocilo])
     redirect('/index/messenger/')
+
+@get("/indexraziskovalec/messenger/")
+def messenger():
+    '''Servira stran (na novi routi) z vsemi sporocili, tudi z vstavljanjem'''
+    curuser = get_user()
+    if pooblastilo(curuser[0]) == 'zdravnik':
+        redirect('/index/')
+    elif pooblastilo(curuser[0]) == 'direktor':
+        redirect('/indexdirektor/')
+    c = baza.cursor()
+    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp = c.fetchall()
+    c1 = baza.cursor()
+    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.posiljatelj = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp1 = c1.fetchall()
+    return template("messenger.html", rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka=None)
+    #return template("messenger.html", user=curuser[0])
+
+@post("/indexraziskovalec/messenger/")
+def novo_sporocilo():
+    ''' Vstavi novo sporocilo v tabelo sporocila.'''
+    prejID = request.forms.prejID
+    sporocilo = request.forms.sporocilo
+    curuser = get_user()
+    c1 = baza.cursor()
+    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+              [prejID])
+    tmp_preveri = c1.fetchone()
+    c2 = baza.cursor()
+    c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp = c2.fetchall()
+    c3 = baza.cursor()
+    c3.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.posiljatelj = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp1 = c3.fetchall()
+
+    if tmp_preveri is None:
+        return template("messenger.html",
+                               rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka="Ta prejemnik ne obstaja!")
+    c = baza.cursor()
+    c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
+                VALUES (%s, %s, %s)""",
+              [curuser[0], prejID, sporocilo])
+    redirect('/index/messenger/')
+
+@get("/indexdirektor/messenger/")
+def messenger():
+    '''Servira stran (na novi routi) z vsemi sporocili, tudi z vstavljanjem'''
+    curuser = get_user()
+    if pooblastilo(curuser[0]) == 'raziskovalec':
+        redirect('/indexraziskovalec/')
+    elif pooblastilo(curuser[0]) == 'zdravnik':
+        redirect('/index/')
+    c = baza.cursor()
+    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp = c.fetchall()
+    c1 = baza.cursor()
+    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.posiljatelj = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp1 = c1.fetchall()
+    return template("messenger.html", rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka=None)
+    #return template("messenger.html", user=curuser[0])
+
+@post("/indexdirektor/messenger/")
+def novo_sporocilo():
+    ''' Vstavi novo sporocilo v tabelo sporocila.'''
+    prejID = request.forms.prejID
+    sporocilo = request.forms.sporocilo
+    curuser = get_user()
+    c1 = baza.cursor()
+    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+              [prejID])
+    tmp_preveri = c1.fetchone()
+    c2 = baza.cursor()
+    c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp = c2.fetchall()
+    c3 = baza.cursor()
+    c3.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.posiljatelj = %s
+                ORDER BY sporocila.datum DESC""",
+              [curuser[0]])
+    tmp1 = c3.fetchall()
+
+    if tmp_preveri is None:
+        return template("messenger.html",
+                               rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka="Ta prejemnik ne obstaja!")
+    c = baza.cursor()
+    c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
+                VALUES (%s, %s, %s)""",
+              [curuser[0], prejID, sporocilo])
+    redirect('/index/messenger/')
+
 
 run(host='localhost', port=8080)
 
