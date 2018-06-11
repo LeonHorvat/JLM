@@ -1,14 +1,25 @@
 # e-kartoteka
-Repozitorij za projekt pri predmetu osnove podatkovnih baz, na katerem delamo: Leon Horvat, Metod Jazbec in Jernej Banevec.
+Na repozitoriju se nahaja enostaven portal namenjen vnosu in pregledu zdravstvenih podatkov. Najprej je potrebno sklonirati repozitorij, nato je apliakcija dostopna na naslovu http://localhost:8080/login/ . Prijavimo se lahko s tremi različnimi pooblastili: zdravnik, direktor ter raziskovalec.
 
-Poskusili bomo implementirati medicinsko bazo, v katero se bodo beležili vsi opravljeni pregledi. 
-Rezultat pregleda je lahko ali napotitev na dodatni test (napotnica) ali postavljena diagnoza. 
-Za izdelavo uporabniškega vmesnika bomo uporabili bottle ali Django (oba Python frameworka).
+Zdravnik lahko išče po kartoteki posameznega vnosa, ter vnaša preglede za katere je specializiran. Raziskovalec ima omejen dostop do podatkovne baze in sicer lahko pridobi le podatke o letni uporabi zdravil in pogostosti bolezni. Direktor sprejema in potrjuje zahtevke raziskovalcev za dostop. Aplikaciji smo dodali tudi interni e-mail, da lahko zaposleni med seboj komunicirajo.
 
-TODO: optimalno modeliranje tabele pregled (primerne podatkovne strukture), relacija s tabelo diagnoza, dodati manjkajoče atribute
+Primeri uporabniških imen ter gesel za:
 
-PRIMER: https://dba.stackexchange.com/questions/157148/how-can-i-model-a-medical-scenario-in-an-entity-relationship-diagram
+(zdravnik) <br />
+upo. ime: sgalea0 <br />
+geslo: wXNoal
 
+(raziskovalec) <br />
+upo. ime: rdollarh <br />
+geslo: 7t6rIU 
+
+(direktor) <br />
+upo. ime: lhearse5i <br />
+geslo: lbfEDb 
+
+
+
+Prilagamo še sliko ER-diagrama, na podlagi katerega smo oblikovali našo podatkovno bazo.
 ![alt text](ER-diagram.png)
 
 
