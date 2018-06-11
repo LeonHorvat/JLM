@@ -472,7 +472,7 @@ def index_raziskovalec():
 def pregled():
     curuser = get_user()
     c_spor = baza.cursor()
-    c_spor.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    c_spor.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
