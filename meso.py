@@ -465,7 +465,9 @@ def pregled_post():
         diagnozaid = c.fetchone()[0]
         vrstica1 = [ID, zdravnik, testZdaj, 'NULL', diagnozaid, izvid]
         c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,diagnoza,izvid)
-                    VALUES ({0},'{1}','{2}',{3},{4},'{5}');""".format(*vrstica1))
+                    VALUES ({0},'{1}','{2}',{3},{4},'{5}');
+                    UPDATE pregled SET diagnoza = {4}
+                    WHERE oseba = {0} AND diagnoza IS NULL""".format(*vrstica1))
     redirect('/index/')
 
 
