@@ -114,11 +114,25 @@ def login_post():
     c.execute("SELECT * FROM uporabnik WHERE username=%s AND hash=%s",
               [username, password])
     tmp = c.fetchone()
+    # preverimo, ali je zahtevek mogoce v cakanju
+    c2 = baza.cursor()
+    c2.execute("SELECT * FROM zahtevek WHERE username=%s AND hash=%s",
+              [username, password])
+    tmp2 = c2.fetchone()
+    print(tmp2)
     if tmp is None:
-        # Username in geslo se ne ujemata
-        return template("login.html",
-                               napaka="Nepravilna prijava",
-                               username=username)
+        if tmp2 is None:
+            return template("login.html",
+                                   napaka="Nepravilna prijava",
+                                   username=username)
+        elif tmp2[7] == True:
+            return template("login.html",
+                            napaka="Nepravilna prijava",
+                            username=username)
+        else:
+            return template("login.html",
+                            napaka="Zahtevek registracije je v cakanju.",
+                            username=username)
     else:
         response.set_cookie('username', username, path='/', secret=secret)
         if tmp[2] == 'zdravnik':
@@ -139,6 +153,12 @@ def login_get():
     """Serviraj formo za login."""
     curuser = get_user(auto_login = False, auto_redir = True)
     return template("register.html", name=None, surname=None, institution=None, mail=None,napaka=None)
+
+@get("/forgot-password/")
+def login_get():
+    """Serviraj formo za login."""
+    curuser = get_user(auto_login = False, auto_redir = True)
+    return template("forgot-password.html")
 
 @post("/register/")
 def nov_zahtevek():
@@ -211,7 +231,7 @@ def kartoteka():
         try:
             int(ID)
         except ValueError:
-            return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", rows_spor = None, user=curuser[0], click=0)
+            return template("index.html", napaka="Nepravilna poizvedba, napacna oblika vnesenih podatkov.", rows_spor = None, user=curuser[0], click=0)
         if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
@@ -221,18 +241,22 @@ def kartoteka():
                          JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
                          JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
                          ON pregled.diagnoza = diagnoza.diagnozaID
-                         WHERE oseba.osebaID = %s
-                         ORDER BY pregled.datum""",
+                         WHERE oseba.osebaID = %s                         
+                         ORDER BY pregled.datum DESC""",
                       [ID])
 
         else:
-            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime FROM pregled
+            c.execute("""SELECT datum, ime FROM (
+                        SELECT pregled.datum, bolezen.ime, 
+                        ROW_NUMBER() OVER (PARTITION BY bolezen.ime ORDER BY pregled.datum) AS RowNumber
+                        FROM pregled
                         JOIN oseba ON pregled.oseba = oseba.osebaID
                         JOIN diagnoza
                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
                         ON pregled.diagnoza = diagnoza.diagnozaID
-                        WHERE oseba.osebaID = %s
-                        ORDER BY pregled.datum""",
+                        WHERE oseba.osebaID = %s)
+                        AS a WHERE a.RowNumber = 1
+                        ORDER BY datum DESC""",
                       [ID])
 
         d = baza.cursor()
@@ -245,28 +269,36 @@ def kartoteka():
         ime = request.forms.ime
         priimek = request.forms.priimek
         rojstvo = request.forms.datum
-        if request.forms.podrobno == 'podrobno':
-            c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
-                         JOIN test ON pregled.testZdaj = test.testID
-                         JOIN oseba ON pregled.oseba = oseba.osebaID
-                         JOIN diagnoza 
-                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
-                         JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
-                         JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
-                         ON pregled.diagnoza = diagnoza.diagnozaID
-                         WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
-                         ORDER BY pregled.datum DESC""",
-                      [ime, priimek, rojstvo])
-        else:
-            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
-                        JOIN oseba ON pregled.oseba = oseba.osebaID
-                        JOIN diagnoza
-                        JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
-                        ON pregled.diagnoza = diagnoza.diagnozaID
-                        WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
-                        ORDER BY pregled.datum DESC""",
-                      [ime, priimek, rojstvo])
-            ime_priimek = ime + ' ' + priimek
+        try:
+            if request.forms.podrobno == 'podrobno':
+                c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
+                             JOIN test ON pregled.testZdaj = test.testID
+                             JOIN oseba ON pregled.oseba = oseba.osebaID
+                             JOIN diagnoza 
+                             JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                             JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
+                             JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
+                             ON pregled.diagnoza = diagnoza.diagnozaID
+                             WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
+                             ORDER BY pregled.datum DESC""",
+                          [ime, priimek, rojstvo])
+            else:
+                c.execute(""" SELECT datum, ime FROM (
+                            SELECT pregled.datum, bolezen.ime, 
+                            ROW_NUMBER() OVER (PARTITION BY bolezen.ime ORDER BY pregled.datum) AS RowNumber
+                            FROM pregled
+                            JOIN oseba ON pregled.oseba = oseba.osebaID
+                            JOIN diagnoza
+                            JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                            ON pregled.diagnoza = diagnoza.diagnozaID
+                            WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s)
+                            AS a WHERE   a.RowNumber = 1
+                            ORDER BY datum DESC""",
+                          [ime, priimek, rojstvo])
+                ime_priimek = ime + ' ' + priimek
+        except psycopg2.DataError:
+            return template("index.html", napaka="Nepravilna poizvedba, napacna oblika vnesenih podatkov.", rows_spor = None, user=curuser[0], click=0)
+
     tmp = c.fetchall()
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
@@ -470,8 +502,8 @@ def pregled():
 
 @post("/index/pregled/")
 def pregled_post():
-    ID = request.forms.ID
     curuser = get_user()
+    ID = request.forms.ID
     zdravnik = curuser[0]
 
     c = baza.cursor()
@@ -510,7 +542,9 @@ def pregled_post():
         diagnozaid = c.fetchone()[0]
         vrstica1 = [ID, zdravnik, testZdaj, 'NULL', diagnozaid, izvid]
         c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,diagnoza,izvid)
-                    VALUES ({0},'{1}','{2}',{3},{4},'{5}');""".format(*vrstica1))
+                    VALUES ({0},'{1}','{2}',{3},{4},'{5}');
+                    UPDATE pregled SET diagnoza = {4}
+                    WHERE oseba = {0} AND diagnoza IS NULL""".format(*vrstica1))
     redirect('/index/')
 
 

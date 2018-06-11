@@ -162,6 +162,14 @@
 				% end
 			</select>
 		</div>
+		<div class="form-group">	
+			<label for="izvid"> Izvid</label>
+			<input type="izvid" class="form-control" placeholder="Izvid" 
+			name="izvid">
+		</div>
+		<div>
+		 Pacienta napotite na nadaljnje teste ali postavite diagnozo in predpišite zdravilo.
+		</div>
 		<div class="form-group">
 			<label for="testNaprej"> Šifra naslednjega testa</label>
 			<select type="testNaprej" class="form-control" placeholder="Naslednji test" 
@@ -171,12 +179,9 @@
 					<option>{{i}}</option>
 				% end
 			</select>
-			 <small id="opozorilo" class="form-text text-muted">Če je postavljena diagnoza, pustite prazno.</small>
+			 <!--small id="opozorilo" class="form-text text-muted">Če je postavljena diagnoza, pustite prazno.</small-->
 		</div>
-		<div class="form-group">	
-			<label for="izvid"> Izvid</label>
-			<input type="izvid" class="form-control" placeholder="Izvid" 
-			name="izvid">
+		<div class="form-group">		
 			<label for="diagnoza"> Diagnoza</label>
 			<select type="diagnoza" class="form-control" placeholder="Diagnoza" 
 			name="diagnoza">	
