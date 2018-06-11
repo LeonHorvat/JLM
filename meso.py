@@ -114,11 +114,25 @@ def login_post():
     c.execute("SELECT * FROM uporabnik WHERE username=%s AND hash=%s",
               [username, password])
     tmp = c.fetchone()
+    # preverimo, ali je zahtevek mogoce v cakanju
+    c2 = baza.cursor()
+    c2.execute("SELECT * FROM zahtevek WHERE username=%s AND hash=%s",
+              [username, password])
+    tmp2 = c2.fetchone()
+    print(tmp2)
     if tmp is None:
-        # Username in geslo se ne ujemata
-        return template("login.html",
-                               napaka="Nepravilna prijava",
-                               username=username)
+        if tmp2 is None:
+            return template("login.html",
+                                   napaka="Nepravilna prijava",
+                                   username=username)
+        elif tmp2[7] == True:
+            return template("login.html",
+                            napaka="Nepravilna prijava",
+                            username=username)
+        else:
+            return template("login.html",
+                            napaka="Zahtevek registracije je v cakanju.",
+                            username=username)
     else:
         response.set_cookie('username', username, path='/', secret=secret)
         if tmp[2] == 'zdravnik':
@@ -139,6 +153,12 @@ def login_get():
     """Serviraj formo za login."""
     curuser = get_user(auto_login = False, auto_redir = True)
     return template("register.html", name=None, surname=None, institution=None, mail=None,napaka=None)
+
+@get("/forgot-password/")
+def login_get():
+    """Serviraj formo za login."""
+    curuser = get_user(auto_login = False, auto_redir = True)
+    return template("forgot-password.html")
 
 @post("/register/")
 def nov_zahtevek():
@@ -211,7 +231,7 @@ def kartoteka():
         try:
             int(ID)
         except ValueError:
-            return template("index.html", napaka="Nepravilna poizvedba, napačna oblika vnešenih podatkov.", rows_spor = None, user=curuser[0], click=0)
+            return template("index.html", napaka="Nepravilna poizvedba, napacna oblika vnesenih podatkov.", rows_spor = None, user=curuser[0], click=0)
         if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
@@ -277,7 +297,7 @@ def kartoteka():
                           [ime, priimek, rojstvo])
                 ime_priimek = ime + ' ' + priimek
         except psycopg2.DataError:
-            return template("index.html", napaka="Nepravilna poizvedba, napačna oblika vnešenih podatkov.", rows_spor = None, user=curuser[0], click=0)
+            return template("index.html", napaka="Nepravilna poizvedba, napacna oblika vnesenih podatkov.", rows_spor = None, user=curuser[0], click=0)
 
     tmp = c.fetchall()
     if len(tmp) == 0:
