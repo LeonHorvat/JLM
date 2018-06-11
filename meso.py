@@ -333,6 +333,12 @@ def index_direktor():
     #update: sedaj se stran osvezi ob kliku na gumb (samo potrebno je bilo sprementi parameter v location.reload()
     # na true. Ni sicer najlepsa resitev, lepse bi bilo, ce bi se tabele na strani posodobile, brez osvezitve strani.
     # Za to bi bilo potrebno bolj podrobno pogledati jquery.
+def vrni_prvi_stolpec(seznam):
+    #odstrani nepotrebne znake okrog besedila
+    nov = []
+    for i in seznam:
+        nov.append(i[0])
+    return nov
 
 @get("/indexraziskovalec/")
 def index_raziskovalec():
@@ -342,15 +348,86 @@ def index_raziskovalec():
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
     else:
-        return template("indexraziskovalec.html", user=curuser[0])
+        c = baza.cursor()
+        c.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+        tmp1 = c.fetchall()
+        c.execute("""SELECT DISTINCT ime FROM zdravilo
+                    ORDER BY ime""")
+        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT DISTINCT ime FROM bolezen
+                    ORDER BY ime""")
+        bolezen_seznam = vrni_prvi_stolpec(c.fetchall())
+        return template("indexraziskovalec.html", rows_spor = tmp1, user=curuser[0], zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, click = 0)
 
+def odstrani_nicle(seznam):
+    """Odstrani nicle pri letu v seznamu tock, kjer so leta na prvem mestu v tocki"""
+    nov_sez = []
+    for element in seznam:
+        nov_element = (int(element[0]), element[1])
+        nov_sez.append(nov_element)
+    return nov_sez
+            
+        
 
-def vrni_prvi_stolpec(seznam):
-    #odstrani nepotrebne znake okrog besedila
-    nov = []
-    for i in seznam:
-        nov.append(i[0])
-    return nov
+@post("/indexraziskovalec/")
+def index_raziskovalec():
+    curuser = get_user()
+    c = baza.cursor()
+    if request.forms.zdravilo:
+        c.execute("""SELECT zdraviloid FROM zdravilo
+                    WHERE ime = %s""",
+                  [request.forms.zdravilo])
+        zdravilo = c.fetchone()[0]
+        c.execute("""SELECT leto, count(*) FROM 
+                        (SELECT zdravilo, extract(year FROM datum) AS leto FROM pregled
+                        JOIN diagnoza ON diagnoza = diagnozaid
+                        WHERE zdravilo = %s) AS analiza
+                        GROUP BY leto""", [zdravilo])
+        rows_leto1 = c.fetchall()
+        c.execute("""SELECT DISTINCT ime FROM zdravilo
+                    ORDER BY ime""")
+        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+        tmp1 = c.fetchall()
+        rows_leto = odstrani_nicle(rows_leto1)
+        c.execute("""SELECT DISTINCT ime FROM bolezen
+                    ORDER BY ime""")
+        bolezen_seznam = vrni_prvi_stolpec(c.fetchall())
+        return template("indexraziskovalec.html", rows_spor = tmp1, rows_leto = rows_leto, zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, user=curuser[0], text = request.forms.zdravilo, click = 1)
+    elif request.forms.bolezen:
+        c.execute("""SELECT bolezenid FROM bolezen
+                    WHERE ime = %s""",
+                  [request.forms.bolezen])
+        bolezen = c.fetchone()[0]
+        c.execute("""SELECT leto, count(*) FROM 
+                        (SELECT bolezen, extract(year FROM datum) AS leto FROM pregled
+                        JOIN diagnoza ON diagnoza = diagnozaid
+                        WHERE bolezen= %s) AS analiza
+                        GROUP BY leto""", [bolezen])
+        rows_leto1 = c.fetchall()
+        c.execute("""SELECT DISTINCT ime FROM zdravilo
+                    ORDER BY ime""")
+        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT DISTINCT ime FROM bolezen
+                    ORDER BY ime""")
+        bolezen_seznam = vrni_prvi_stolpec(c.fetchall())
+        c.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+        tmp1 = c.fetchall()
+        rows_leto = odstrani_nicle(rows_leto1)
+        return template("indexraziskovalec.html", rows_spor = tmp1, rows_leto = rows_leto, user=curuser[0], zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, text = request.forms.bolezen, click = 1)                        
+
 
 @get("/index/pregled/")
 def pregled():

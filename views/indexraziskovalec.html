@@ -26,20 +26,16 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarResponsive">
+	<!--
       <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
-        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Kartoteka">
-          <a class="nav-link" onclick="myFunction2()">
-            <i class="fa fa-fw fa-heartbeat"></i>
-            <span class="nav-link-text">Kartoteka</span>
-          </a>
-        </li>
-        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Vnos pregleda">
-          <a class="nav-link" onclick="myFunction3()">
-            <i class="fa fa-fw fa-plus-square"></i>
-            <span class="nav-link-text">Vnos pregleda</span>
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Napredno iskanje">
+          <a class="nav-link"">
+            <i class="fa fa-fw fa-search-plus"></i>
+            <span class="nav-link-text">Napredno iskanje</span>
           </a>
         </li>
       </ul>
+	  -->
       <ul class="navbar-nav sidenav-toggler">
         <li class="nav-item">
           <a class="nav-link text-center" id="sidenavToggler">
@@ -64,68 +60,16 @@
           <div class="dropdown-menu" aria-labelledby="messagesDropdown">
             <h6 class="dropdown-header">New Messages:</h6>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <strong>Jernej Banevec</strong>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">2:2 je :(((</div>
+			% if rows_spor is not None:
+			% for i in range(len(rows_spor)):
+            <a class="dropdown-item" href="messenger/">
+              <strong>{{rows_spor[i][0]}}</strong>
+              <div class="dropdown-message small">{{rows_spor[i][2]}}</div>
             </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <strong>Anamari Oštarijaš</strong>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">Ja navadn...</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <strong>Leon Horvat</strong>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">Podarjam ti svojega ponija.</div>
-            </a>
-            <div class="dropdown-divider"></div>
+			% end
+			% end
+           <div class="dropdown-divider"></div>
             <a class="dropdown-item small" href="messenger/">View all messages</a>
-          </div>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle mr-lg-2" id="alertsDropdown" href="messenger/" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-fw fa-bell"></i>
-            <span class="d-lg-none">Alerts
-              <span class="badge badge-pill badge-warning">6 New</span>
-            </span>
-            <span class="indicator text-warning d-none d-lg-block">
-              <i class="fa fa-fw fa-circle"></i>
-            </span>
-          </a>
-          <div class="dropdown-menu" aria-labelledby="alertsDropdown">
-            <h6 class="dropdown-header">New Alerts:</h6>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <span class="text-success">
-                <strong>
-                  <i class="fa fa-long-arrow-up fa-fw"></i>Status Update</strong>
-              </span>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <span class="text-danger">
-                <strong>
-                  <i class="fa fa-long-arrow-down fa-fw"></i>Status Update</strong>
-              </span>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <span class="text-success">
-                <strong>
-                  <i class="fa fa-long-arrow-up fa-fw"></i>Status Update</strong>
-              </span>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item small" href="#">View all alerts</a>
           </div>
         </li>
         <li class="nav-item">
@@ -150,72 +94,65 @@
   <div class="content-wrapper">
   <div class="container-fluid">
       <!-- Breadcrumbs-->
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-          <a href="index.html">Dashboard</a>
-        </li>
-        <li class="breadcrumb-item active">Blank Page</li>
-      </ol>
       <div class="row">
         <div class="col-12" id="osnovna">
           <h1>RAZISKOVALEC</h1>
         </div>
       </div>
 	  <div class="row">
-        <div class="col-12" id="kartoteka" style="display:none;">
-          <form>
-            <div class="col-12">Išči po ID-u pacienta
-            </div>
-          </form>
-          <form>
-            <div class="input-group">
-              <input class="form-control" type="text" placeholder="ID pacienta">
-              <span class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-          </form>
-		  <form>
-            <div class="col-12">Išči po imenu, priimku in rojstvu pacienta
-            </div>
-          </form>
-          <form>
-            <div class="input-group">
-              <input class="form-control" type="text" placeholder="Ime pacienta">
-              <span class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-          </form>
-		  <form>
-            <div class="input-group">
-              <input class="form-control" type="text" placeholder="Priimek pacienta">
-              <span class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-          </form>
-		  <form>
-            <div class="input-group">
-              <input class="form-control" type="text" placeholder="Rojstvo pacienta">
-              <span class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-          </form>
-        </div>
-      </div>
-	  <div class="row">
-        <div class="col-12" id="vnos" style="display:none;">
-          <h1>VNESI PREGLED</h1>
+        <div class="col-12" id="prikaz">
+		<form role="form" method="post" action=".">
+			<div class="form-group">	
+				<label for="zdravilo"> Zdravilo</label>
+				<select type="zdravilo" class="form-control" placeholder="zdravilo" 
+				name="zdravilo">	
+					<option></option>
+					% for i in zdravilo_seznam:
+						<option>{{i}}</option>
+					% end
+				</select>
+			</div>
+			<div class="form-group">	
+				<label for="bolezen"> Bolezen</label>
+				<select type="bolezen" class="form-control" placeholder="bolezen" 
+				name="bolezen">	
+					<option></option>
+					% for i in bolezen_seznam:
+						<option>{{i}}</option>
+					% end
+				</select>
+			</div> 
+			<button type="submit" class="btn btn-primary btn-block">Išči</button>	
+		  </form>
+		  % if click == 1:	  
+		  <div class="card mb-3" id="dataTable1">
+			<div class="card-header">
+			% if text is not None:
+			  <i class="fa fa-table"></i> Analiza za <b>{{text}}</b></div>
+			  % end
+			<div class="card-body">
+			  <div class="table">
+				<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+				  <thead>
+					<tr>
+					  <th>Leto</th>
+					  <th>Frekvenca</th>
+					</tr>
+				  </thead>
+				  <tbody>  
+				  % for row in rows_leto:
+					<tr>
+					  %for col in row:
+						<td>{{col}}</td>
+					  %end
+					</tr>
+				  %end
+				 </tbody>
+				</table>
+			  </div>
+			</div>
+		  </div>
+		  % end		  
         </div>
       </div>
     </div>
@@ -256,9 +193,14 @@
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("kartoteka");
 		var z = document.getElementById("vnos");
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");		
 		x.style.display = "block";
 		y.style.display = "none";
 		z.style.display = "none";
+		W.style.display = "none";
+		Q.style.display = "none";
+		click = 0;
 	}
 	</script>
 	<script>
@@ -266,20 +208,13 @@
 		var x = document.getElementById("osnovna");
 		var y = document.getElementById("kartoteka");
 		var z = document.getElementById("vnos");
-		var W = 
+		var W = document.getElementById("dataTable1");
+		var Q = document.getElementById("dataTable2");
 		x.style.display = "none";
 		y.style.display = "block";
 		z.style.display = "none";
-	}
-	</script>
-	<script>
-	function myFunction3() {
-		var x = document.getElementById("osnovna");
-		var y = document.getElementById("kartoteka");
-		var z = document.getElementById("vnos");
-		x.style.display = "none";
-		y.style.display = "none";
-		z.style.display = "block";
+		W.style.display = "none";
+		Q.style.display = "none";
 	}
 	</script>
     <script src="\static\vendor/jquery/jquery.min.js"></script>
