@@ -5,17 +5,17 @@ Zdravnik lahko išče po kartoteki posameznega vnosa, ter vnaša preglede za kat
 
 Primeri uporabniških imen ter gesel za:
 
-(zdravnik) \n
-upo. ime: sgalea0 \n
-geslo: wXNoal\n
+(zdravnik) <br />
+upo. ime: sgalea0 <br />
+geslo: wXNoal
 
-(raziskovalec) \n
-upo. ime: rdollarh \n
-geslo: 7t6rIU \n
+(raziskovalec) <br />
+upo. ime: rdollarh <br />
+geslo: 7t6rIU 
 
-(direktor) \n
-upo. ime: lhearse5i \n
-geslo: lbfEDb \n
+(direktor) <br />
+upo. ime: lhearse5i <br />
+geslo: lbfEDb 
 
 
 
