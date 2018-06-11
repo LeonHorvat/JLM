@@ -211,7 +211,7 @@ def kartoteka():
         try:
             int(ID)
         except ValueError:
-            return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", rows_spor = None, user=curuser[0], click=0)
+            return template("index.html", napaka="Nepravilna poizvedba, napačna oblika vnešenih podatkov.", rows_spor = None, user=curuser[0], click=0)
         if request.forms.podrobno == 'podrobno':
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
@@ -221,18 +221,22 @@ def kartoteka():
                          JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
                          JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
                          ON pregled.diagnoza = diagnoza.diagnozaID
-                         WHERE oseba.osebaID = %s
-                         ORDER BY pregled.datum""",
+                         WHERE oseba.osebaID = %s                         
+                         ORDER BY pregled.datum DESC""",
                       [ID])
 
         else:
-            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime FROM pregled
+            c.execute("""SELECT datum, ime FROM (
+                        SELECT pregled.datum, bolezen.ime, 
+                        ROW_NUMBER() OVER (PARTITION BY bolezen.ime ORDER BY pregled.datum) AS RowNumber
+                        FROM pregled
                         JOIN oseba ON pregled.oseba = oseba.osebaID
                         JOIN diagnoza
                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
                         ON pregled.diagnoza = diagnoza.diagnozaID
-                        WHERE oseba.osebaID = %s
-                        ORDER BY pregled.datum""",
+                        WHERE oseba.osebaID = %s)
+                        AS a WHERE a.RowNumber = 1
+                        ORDER BY datum DESC""",
                       [ID])
 
         d = baza.cursor()
@@ -245,28 +249,36 @@ def kartoteka():
         ime = request.forms.ime
         priimek = request.forms.priimek
         rojstvo = request.forms.datum
-        if request.forms.podrobno == 'podrobno':
-            c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
-                         JOIN test ON pregled.testZdaj = test.testID
-                         JOIN oseba ON pregled.oseba = oseba.osebaID
-                         JOIN diagnoza 
-                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
-                         JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
-                         JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
-                         ON pregled.diagnoza = diagnoza.diagnozaID
-                         WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
-                         ORDER BY pregled.datum DESC""",
-                      [ime, priimek, rojstvo])
-        else:
-            c.execute("""SELECT DISTINCT pregled.datum, bolezen.ime  FROM pregled
-                        JOIN oseba ON pregled.oseba = oseba.osebaID
-                        JOIN diagnoza
-                        JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
-                        ON pregled.diagnoza = diagnoza.diagnozaID
-                        WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
-                        ORDER BY pregled.datum DESC""",
-                      [ime, priimek, rojstvo])
-            ime_priimek = ime + ' ' + priimek
+        try:
+            if request.forms.podrobno == 'podrobno':
+                c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
+                             JOIN test ON pregled.testZdaj = test.testID
+                             JOIN oseba ON pregled.oseba = oseba.osebaID
+                             JOIN diagnoza 
+                             JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                             JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
+                             JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
+                             ON pregled.diagnoza = diagnoza.diagnozaID
+                             WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s
+                             ORDER BY pregled.datum DESC""",
+                          [ime, priimek, rojstvo])
+            else:
+                c.execute(""" SELECT datum, ime FROM (
+                            SELECT pregled.datum, bolezen.ime, 
+                            ROW_NUMBER() OVER (PARTITION BY bolezen.ime ORDER BY pregled.datum) AS RowNumber
+                            FROM pregled
+                            JOIN oseba ON pregled.oseba = oseba.osebaID
+                            JOIN diagnoza
+                            JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
+                            ON pregled.diagnoza = diagnoza.diagnozaID
+                            WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s)
+                            AS a WHERE   a.RowNumber = 1
+                            ORDER BY datum DESC""",
+                          [ime, priimek, rojstvo])
+                ime_priimek = ime + ' ' + priimek
+        except psycopg2.DataError:
+            return template("index.html", napaka="Nepravilna poizvedba, napačna oblika vnešenih podatkov.", rows_spor = None, user=curuser[0], click=0)
+
     tmp = c.fetchall()
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
@@ -381,8 +393,8 @@ def pregled():
 
 @post("/index/pregled/")
 def pregled_post():
-    ID = request.forms.ID
     curuser = get_user()
+    ID = request.forms.ID
     zdravnik = curuser[0]
 
     c = baza.cursor()
