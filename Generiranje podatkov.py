@@ -1,47 +1,47 @@
 #podatki
 
 import pandas as pd
-test = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\test.csv', encoding = "ISO-8859-1",
+test = pd.read_csv('podatki/test.csv', encoding = "ISO-8859-1",
                    error_bad_lines=False,
                    header=None,
                    names=['testiD', 'imena'],
                    sep = ';')
 testID = list(test.testiD)
 
-bolezen = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\bolezen.csv', encoding = "ISO-8859-1",
+bolezen = pd.read_csv('podatki/bolezen.csv', encoding = "ISO-8859-1",
                    error_bad_lines=False,
                    header=None,
                    names=['bolezenID', 'imena'],
                    sep = ';')
 bolezenID = list(bolezen.bolezenID)
 
-zdravilo = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\zdravilo.csv', encoding = "ISO-8859-1",
+zdravilo = pd.read_csv('podatki/zdravilo.csv', encoding = "ISO-8859-1",
                    error_bad_lines=False,
                    header=None,
                    names=['zdraviloID', 'imena'],
                    sep = ';')
 zdraviloID = list(zdravilo.zdraviloID)
 
-datumi = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\datumi.csv', encoding = "ISO-8859-1",
+datumi = pd.read_csv('podatki/datumi.csv', encoding = "ISO-8859-1",
                    error_bad_lines=False,
                    sep = ';')
 datum = list(datumi.datum)
 
-uporabniki = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\uporabniki.csv', encoding = "ISO-8859-1",
+uporabniki = pd.read_csv('podatki/uporabniki.csv', encoding = "ISO-8859-1",
                    error_bad_lines=False,
                    sep = ',')
 geslo = list(uporabniki.password)
 username = list(uporabniki.username)
 pooblastilo = list(uporabniki.pooblastilo)
 
-zdravniki = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\zdravniki.csv', encoding = 'utf8',
+zdravniki = pd.read_csv('podatki/zdravniki.csv', encoding = 'utf8',
                    error_bad_lines=False,
                    sep = ',')
 ime = list(zdravniki.ime)
 priimek = list(zdravniki.priimek)
 rojstvo = list(zdravniki.rojstvo)
 
-osebe = pd.read_csv('C:\\Faks\\OPB\\e-kartoteka\\podatki\\oseba.csv', encoding = 'utf8',
+osebe = pd.read_csv('podatki/oseba.csv', encoding = 'utf8',
                    error_bad_lines=False,
                    sep = ',')
 
@@ -64,7 +64,7 @@ def naredi_podatke_specializacija(stevilo, datoteka, username, pooblastilo):
             text_file.write("INSERT INTO specializacija(zdravnik,test) VALUES ('{0}','{1}');".format(*vrstica))
 
 
-specializacija = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\specializacija.txt'
+specializacija = 'podatki/specializacija.txt'
 
 #naredi_podatke_specializacija(500, specializacija, username, pooblastilo)
 
@@ -77,7 +77,7 @@ def naredi_podatke_diagnoza(stevilo, datoteka, username, pooblastilo):
             text_file.write("INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) VALUES ('{0}',{1}, '{2}');".format(*vrstica))
 
 
-diagnoza = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\diagnoza.txt'
+diagnoza = 'podatki/diagnoza.txt'
 
 #naredi_podatke_diagnoza(10000, diagnoza, username, pooblastilo)
 
@@ -118,7 +118,7 @@ def naredi_podatke_pregled(datoteka, username, pooblastilo):
                                     "({0},'{1}','{2}','{3}',{4},{5},'{6}');".format(*vrstica))
                 date = randomDate(date, "2018-5-5", random.random())
 
-pregled = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\pregled.txt'
+pregled = 'podatki/pregled.txt'
 
 naredi_podatke_pregled(pregled, username, pooblastilo)
 
@@ -146,7 +146,7 @@ def naredi_podatke_uporabniki(uporabnik, geslo, pooblastilo, datoteka):
             vrstica = [uporabnik[j], hash[j], pooblastilo[j]]
             text_file.write("INSERT INTO uporabnik(username,hash,pooblastilo) VALUES ('{0}','{1}','{2}');".format(*vrstica))
 
-uporabnik = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\uporabnik.txt'
+uporabnik = 'podatki/uporabnik.txt'
 
 #naredi_podatke_uporabniki(username, geslo, pooblastilo, uporabnik)
 
@@ -154,7 +154,7 @@ uporabnik = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\uporabnik.txt'
 hash = pretvori_gesla_v_hash(geslo)
 hash = pd.DataFrame({'hash': hash})
 uporabniki_zasebno = uporabniki.join(hash)
-#uporabniki_zasebno.to_csv(path_or_buf='C:\\Faks\\OPB\\uporabniki_zasebno.csv', sep=';', na_rep='', float_format=None, columns=None, header=True, index=False, index_label=None, mode='w', encoding=None, compression=None, quoting=None, quotechar='"', line_terminator='\n', chunksize=None, tupleize_cols=None, date_format=None, doublequote=True, escapechar=None, decimal=',')
+#uporabniki_zasebno.to_csv(path_or_buf='C:/Faks/OPB/uporabniki_zasebno.csv', sep=';', na_rep='', float_format=None, columns=None, header=True, index=False, index_label=None, mode='w', encoding=None, compression=None, quoting=None, quotechar='"', line_terminator='\n', chunksize=None, tupleize_cols=None, date_format=None, doublequote=True, escapechar=None, decimal=',')
 
 
 def naredi_podatke_zdravnik(uporabnik, ime, priimek, rojstvo, pooblastilo, datoteka):
@@ -164,7 +164,7 @@ def naredi_podatke_zdravnik(uporabnik, ime, priimek, rojstvo, pooblastilo, datot
                 vrstica = [uporabnik[j], ime[j], priimek[j], rojstvo[j]]
                 text_file.write("INSERT INTO zdravnik(zdravnikID,ime,priimek,rojstvo) VALUES ('{0}','{1}','{2}','{3}');".format(*vrstica))
 
-zdravnik = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\zdravnik.txt'
+zdravnik = 'podatki/zdravnik.txt'
 
 #naredi_podatke_zdravnik(username, ime, priimek, rojstvo, pooblastilo, zdravnik)
 
@@ -182,6 +182,6 @@ def naredi_podatke_oseba(osebe, zdravniki, datoteka):
             vrstica = [ime[j], priimek[j], rojstvo[j], naslov[j], kri[j], teza[j], visina[j], osebniZdravnik]
             text_file.write("INSERT INTO oseba(ime,priimek,rojstvo,naslov,kri,teza,visina,osebniZdravnik) VALUES ('{0}','{1}','{2}','{3}','{4}',{5},{6},'{7}');".format(*vrstica))
 
-oseba = 'C:\\Faks\\OPB\\e-kartoteka\\podatki\\oseba.txt'
+oseba = 'podatki/oseba.txt'
 
 #naredi_podatke_oseba(osebe, username_zdravnik(username, pooblastilo), oseba)
