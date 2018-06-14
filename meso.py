@@ -18,7 +18,7 @@ def test(posta):
                 ''', [posta])
     return (cur.fetchall())
 
-print(test('sgalea0'))
+#print(test('sgalea0'))
 
 
 
@@ -41,11 +41,9 @@ static_dir = "./static"
 secret = "to skrivnost je zelo tezko uganiti 1094107c907cw982982c42"
 
 def pooblastilo(user):
-    c = baza.cursor()
-    c.execute("SELECT pooblastilo FROM uporabnik WHERE username=%s",
+    cur.execute("SELECT pooblastilo FROM uporabnik WHERE username=%s",
               [user])
-    r = c.fetchone()[0]
-    c.close()
+    r = cur.fetchone()[0]
     return r
 
 
@@ -206,13 +204,12 @@ def logout():
 @get("/index/")
 def index():
     curuser = get_user()
-    c1 = baza.cursor()
-    c1.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
               [curuser[0]])
-    tmp1 = c1.fetchall()
+    tmp1 = cur.fetchall()
     if pooblastilo(curuser[0]) == 'raziskovalec':
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
@@ -259,11 +256,10 @@ def kartoteka():
                         ORDER BY datum DESC""",
                       [ID])
 
-        d = baza.cursor()
-        d.execute("""SELECT oseba.ime, oseba.priimek FROM oseba
+        cur.execute("""SELECT oseba.ime, oseba.priimek FROM oseba
                     WHERE oseba.osebaID = %s""",
                   [ID])
-        ime_priimek = d.fetchone()
+        ime_priimek = cur.fetchone()
     else:
         #iz vpisanega imena, priimka in datuma rojstva vrni tabelo diagnoz te osebe, razvrscene po datumu
         ime = request.forms.ime
@@ -300,6 +296,7 @@ def kartoteka():
             return template("index.html", napaka="Nepravilna poizvedba, napacna oblika vnesenih podatkov.", rows_spor = None, user=curuser[0], click=0)
 
     tmp = c.fetchall()
+    c.close()
     print(ime_priimek)
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
@@ -319,45 +316,38 @@ def index_direktor():
     elif pooblastilo(curuser[0]) == 'zdravnik':
         redirect('/index/')
     else:
-        c = baza.cursor()
-        c.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+        cur.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
                         WHERE zahtevek.odobreno = %s
                         ORDER BY zahtevek.datum DESC""",
                   [False])
-        tmp = c.fetchall()
-        c1 = baza.cursor()
-        c1.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+        tmp = cur.fetchall()
+        cur.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
                         WHERE zahtevek.odobreno = %s
                         ORDER BY zahtevek.datum DESC""",
                   [True])
-        tmp1 = c1.fetchall()
-        c2 = baza.cursor()
-        c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+        tmp1 = cur.fetchall()
+        cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                     WHERE sporocila.prejemnik = %s
                     ORDER BY sporocila.datum DESC
                     LIMIT 3""",
                   [curuser[0]])
-        tmp2 = c2.fetchall()
+        tmp2 = cur.fetchall()
         return template("indexdirektor.html", rows=tmp, rows_p=tmp1, rows_spor=tmp2, user=curuser[0], napaka=None)
 
 @post("/indexdirektor/")
 def index_direktor():
     if (str(request.params.type) == "zavrni"):
-        c1 = baza.cursor()
-        c1.execute("""DELETE FROM zahtevek
+        cur.execute("""DELETE FROM zahtevek
                             WHERE zahtevek.username = %s""",
                    [str(request.params.seznam)])
     if (str(request.params.type) == "odobri"):
-        c2 = baza.cursor()
-        c2.execute("""UPDATE zahtevek SET odobreno = true
+        cur.execute("""UPDATE zahtevek SET odobreno = true
                                 WHERE zahtevek.username = %s""",
                    [str(request.params.seznam)])
-        c3 = baza.cursor()
-        c3.execute("""SELECT username, hash FROM zahtevek WHERE zahtevek.username = %s""",
+        cur.execute("""SELECT username, hash FROM zahtevek WHERE zahtevek.username = %s""",
                    [str(request.params.seznam)])
-        tmp = c3.fetchall()
-        c4 = baza.cursor()
-        c4.execute("""INSERT INTO uporabnik (username, hash, pooblastilo) VALUES (%s,%s,%s)""",
+        tmp = cur.fetchall()
+        cur.execute("""INSERT INTO uporabnik (username, hash, pooblastilo) VALUES (%s,%s,%s)""",
                    [tmp[0][0], tmp[0][1], "raziskovalec"])
 
     '''print(tmp)
@@ -388,19 +378,18 @@ def index_raziskovalec():
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
     else:
-        c = baza.cursor()
-        c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+        cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
               [curuser[0]])
-        tmp1 = c.fetchall()
-        c.execute("""SELECT DISTINCT ime FROM zdravilo
+        tmp1 = cur.fetchall()
+        cur.execute("""SELECT DISTINCT ime FROM zdravilo
                     ORDER BY ime""")
-        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
-        c.execute("""SELECT DISTINCT ime FROM bolezen
+        zdravilo_seznam = vrni_prvi_stolpec(cur.fetchall())
+        cur.execute("""SELECT DISTINCT ime FROM bolezen
                     ORDER BY ime""")
-        bolezen_seznam = vrni_prvi_stolpec(c.fetchall())
+        bolezen_seznam = vrni_prvi_stolpec(cur.fetchall())
         return template("indexraziskovalec.html", rows_spor = tmp1, user=curuser[0], zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, click = 0)
 
 def odstrani_nicle(seznam):
@@ -416,55 +405,54 @@ def odstrani_nicle(seznam):
 @post("/indexraziskovalec/")
 def index_raziskovalec():
     curuser = get_user()
-    c = baza.cursor()
     if request.forms.zdravilo:
-        c.execute("""SELECT zdraviloid FROM zdravilo
+        cur.execute("""SELECT zdraviloid FROM zdravilo
                     WHERE ime = %s""",
                   [request.forms.zdravilo])
-        zdravilo = c.fetchone()[0]
-        c.execute("""SELECT leto, count(*) FROM 
+        zdravilo = cur.fetchone()[0]
+        cur.execute("""SELECT leto, count(*) FROM 
                         (SELECT zdravilo, extract(year FROM datum) AS leto FROM pregled
                         JOIN diagnoza ON diagnoza = diagnozaid
                         WHERE zdravilo = %s) AS analiza
                         GROUP BY leto""", [zdravilo])
-        rows_leto1 = c.fetchall()
-        c.execute("""SELECT DISTINCT ime FROM zdravilo
+        rows_leto1 = cur.fetchall()
+        cur.execute("""SELECT DISTINCT ime FROM zdravilo
                     ORDER BY ime""")
-        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
-        c.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+        zdravilo_seznam = vrni_prvi_stolpec(cur.fetchall())
+        cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
               [curuser[0]])
-        tmp1 = c.fetchall()
+        tmp1 = cur.fetchall()
         rows_leto = odstrani_nicle(rows_leto1)
-        c.execute("""SELECT DISTINCT ime FROM bolezen
+        cur.execute("""SELECT DISTINCT ime FROM bolezen
                     ORDER BY ime""")
-        bolezen_seznam = vrni_prvi_stolpec(c.fetchall())
+        bolezen_seznam = vrni_prvi_stolpec(cur.fetchall())
         return template("indexraziskovalec.html", rows_spor = tmp1, rows_leto = rows_leto, zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, user=curuser[0], text = request.forms.zdravilo, click = 1)
     elif request.forms.bolezen:
-        c.execute("""SELECT bolezenid FROM bolezen
+        cur.execute("""SELECT bolezenid FROM bolezen
                     WHERE ime = %s""",
                   [request.forms.bolezen])
-        bolezen = c.fetchone()[0]
-        c.execute("""SELECT leto, count(*) FROM 
+        bolezen = cur.fetchone()[0]
+        cur.execute("""SELECT leto, count(*) FROM 
                         (SELECT bolezen, extract(year FROM datum) AS leto FROM pregled
                         JOIN diagnoza ON diagnoza = diagnozaid
                         WHERE bolezen= %s) AS analiza
                         GROUP BY leto""", [bolezen])
-        rows_leto1 = c.fetchall()
-        c.execute("""SELECT DISTINCT ime FROM zdravilo
+        rows_leto1 = cur.fetchall()
+        cur.execute("""SELECT DISTINCT ime FROM zdravilo
                     ORDER BY ime""")
-        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
-        c.execute("""SELECT DISTINCT ime FROM bolezen
+        zdravilo_seznam = vrni_prvi_stolpec(cur.fetchall())
+        cur.execute("""SELECT DISTINCT ime FROM bolezen
                     ORDER BY ime""")
-        bolezen_seznam = vrni_prvi_stolpec(c.fetchall())
-        c.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+        bolezen_seznam = vrni_prvi_stolpec(cur.fetchall())
+        cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
               [curuser[0]])
-        tmp1 = c.fetchall()
+        tmp1 = cur.fetchall()
         rows_leto = odstrani_nicle(rows_leto1)
         return template("indexraziskovalec.html", rows_spor = tmp1, rows_leto = rows_leto, user=curuser[0], zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, text = request.forms.bolezen, click = 1)                        
 
@@ -472,13 +460,12 @@ def index_raziskovalec():
 @get("/index/pregled/")
 def pregled():
     curuser = get_user()
-    c_spor = baza.cursor()
-    c_spor.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC
                 LIMIT 3""",
               [curuser[0]])
-    tmp_spor = c_spor.fetchall()
+    tmp_spor = cur.fetchall()
     if pooblastilo(curuser[0]) == 'raziskovalec':
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
@@ -595,18 +582,16 @@ def messenger():
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
-    c = baza.cursor()
-    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp = c.fetchall()
-    c1 = baza.cursor()
-    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    tmp = cur.fetchall()
+    cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.posiljatelj = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp1 = c1.fetchall()
+    tmp1 = cur.fetchall()
     return template("messenger.html", rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka=None)
     #return template("messenger.html", user=curuser[0])
 
@@ -616,28 +601,24 @@ def novo_sporocilo():
     prejID = request.forms.prejID
     sporocilo = request.forms.sporocilo
     curuser = get_user()
-    c1 = baza.cursor()
-    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+    cur.execute("SELECT * FROM uporabnik WHERE username=%s",
               [prejID])
-    tmp_preveri = c1.fetchone()
-    c2 = baza.cursor()
-    c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    tmp_preveri = cur.fetchone()
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp = c2.fetchall()
-    c3 = baza.cursor()
-    c3.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    tmp = cur.fetchall()
+    cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.posiljatelj = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp1 = c3.fetchall()
+    tmp1 = cur.fetchall()
 
     if tmp_preveri is None:
         return template("messenger.html",
                                rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka="Ta prejemnik ne obstaja!")
-    c = baza.cursor()
-    c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
+    cur.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
                 VALUES (%s, %s, %s)""",
               [curuser[0], prejID, sporocilo])
     redirect('/index/messenger/')
@@ -650,18 +631,16 @@ def messenger():
         redirect('/index/')
     elif pooblastilo(curuser[0]) == 'direktor':
         redirect('/indexdirektor/')
-    c = baza.cursor()
-    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp = c.fetchall()
-    c1 = baza.cursor()
-    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    tmp = cur.fetchall()
+    cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.posiljatelj = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp1 = c1.fetchall()
+    tmp1 = cur.fetchall()
     return template("messenger.html", rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka=None)
     #return template("messenger.html", user=curuser[0])
 
@@ -671,28 +650,24 @@ def novo_sporocilo():
     prejID = request.forms.prejID
     sporocilo = request.forms.sporocilo
     curuser = get_user()
-    c1 = baza.cursor()
-    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+    cur.execute("SELECT * FROM uporabnik WHERE username=%s",
               [prejID])
-    tmp_preveri = c1.fetchone()
-    c2 = baza.cursor()
-    c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    tmp_preveri = cur.fetchone()
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp = c2.fetchall()
-    c3 = baza.cursor()
-    c3.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    tmp = cur.fetchall()
+    cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.posiljatelj = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp1 = c3.fetchall()
+    tmp1 = cur.fetchall()
 
     if tmp_preveri is None:
         return template("messenger.html",
                                rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka="Ta prejemnik ne obstaja!")
-    c = baza.cursor()
-    c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
+    cur.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
                 VALUES (%s, %s, %s)""",
               [curuser[0], prejID, sporocilo])
     redirect('/index/messenger/')
@@ -705,18 +680,16 @@ def messenger():
         redirect('/indexraziskovalec/')
     elif pooblastilo(curuser[0]) == 'zdravnik':
         redirect('/index/')
-    c = baza.cursor()
-    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp = c.fetchall()
-    c1 = baza.cursor()
-    c1.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    tmp = cur.fetchall()
+    cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.posiljatelj = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp1 = c1.fetchall()
+    tmp1 = cur.fetchall()
     return template("messenger.html", rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka=None)
     #return template("messenger.html", user=curuser[0])
 
@@ -726,28 +699,24 @@ def novo_sporocilo():
     prejID = request.forms.prejID
     sporocilo = request.forms.sporocilo
     curuser = get_user()
-    c1 = baza.cursor()
-    c1.execute("SELECT * FROM uporabnik WHERE username=%s",
+    cur.execute("SELECT * FROM uporabnik WHERE username=%s",
               [prejID])
-    tmp_preveri = c1.fetchone()
-    c2 = baza.cursor()
-    c2.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+    tmp_preveri = cur.fetchone()
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp = c2.fetchall()
-    c3 = baza.cursor()
-    c3.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
+    tmp = cur.fetchall()
+    cur.execute("""SELECT prejemnik, datum, vsebina FROM sporocila
                 WHERE sporocila.posiljatelj = %s
                 ORDER BY sporocila.datum DESC""",
               [curuser[0]])
-    tmp1 = c3.fetchall()
+    tmp1 = cur.fetchall()
 
     if tmp_preveri is None:
         return template("messenger.html",
                                rows=tmp, rows_p = tmp1, user=curuser[0], prejID=None, napaka="Ta prejemnik ne obstaja!")
-    c = baza.cursor()
-    c.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
+    cur.execute("""INSERT INTO sporocila (posiljatelj, prejemnik, vsebina)
                 VALUES (%s, %s, %s)""",
               [curuser[0], prejID, sporocilo])
     redirect('/index/messenger/')
