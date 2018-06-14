@@ -102,7 +102,11 @@
           <h1>VNOS PREGLEDA</h1>
         </div>
     </div>
-        	
+      <h5>
+		%if napaka is not None:
+			{{napaka}}
+		%end
+	  </h5>		
 		<form role="form" method="post" action=".">
 		  <div class="form-group">
 			<label for="ID"> ID pacienta</label>
@@ -163,7 +167,7 @@
 		
 	</div>
   </div>
-  </div>	
+
     <!-- /.container-fluid-->
     <!-- /.content-wrapper-->
     <footer class="sticky-footer">

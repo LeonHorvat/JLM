@@ -236,7 +236,7 @@ def kartoteka():
             c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                          JOIN test ON pregled.testZdaj = test.testID
                          JOIN oseba ON pregled.oseba = oseba.osebaID
-                         JOIN diagnoza 
+                         FULL JOIN diagnoza 
                          JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
                          JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
                          JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
@@ -251,7 +251,7 @@ def kartoteka():
                         ROW_NUMBER() OVER (PARTITION BY bolezen.ime ORDER BY pregled.datum) AS RowNumber
                         FROM pregled
                         JOIN oseba ON pregled.oseba = oseba.osebaID
-                        JOIN diagnoza
+                        FULL JOIN diagnoza
                         JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
                         ON pregled.diagnoza = diagnoza.diagnozaID
                         WHERE oseba.osebaID = %s)
@@ -274,7 +274,7 @@ def kartoteka():
                 c.execute("""SELECT DISTINCT pregled.datum, test.ime, bolezen.ime, zdravilo.ime, zdravnik.ime, zdravnik.priimek, pregled.izvid FROM pregled
                              JOIN test ON pregled.testZdaj = test.testID
                              JOIN oseba ON pregled.oseba = oseba.osebaID
-                             JOIN diagnoza 
+                             FULL JOIN diagnoza 
                              JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
                              JOIN zdravilo ON diagnoza.zdravilo = zdravilo.zdraviloID
                              JOIN zdravnik ON diagnoza.zdravnik = zdravnik.zdravnikID
@@ -288,18 +288,19 @@ def kartoteka():
                             ROW_NUMBER() OVER (PARTITION BY bolezen.ime ORDER BY pregled.datum) AS RowNumber
                             FROM pregled
                             JOIN oseba ON pregled.oseba = oseba.osebaID
-                            JOIN diagnoza
+                            FULL JOIN diagnoza
                             JOIN bolezen ON diagnoza.bolezen = bolezen.bolezenID
                             ON pregled.diagnoza = diagnoza.diagnozaID
                             WHERE oseba.ime = %s AND oseba.priimek = %s AND oseba.rojstvo = %s)
                             AS a WHERE   a.RowNumber = 1
                             ORDER BY datum DESC""",
                           [ime, priimek, rojstvo])
-                ime_priimek = ime + ' ' + priimek
+            ime_priimek = (ime, priimek)
         except psycopg2.DataError:
             return template("index.html", napaka="Nepravilna poizvedba, napacna oblika vnesenih podatkov.", rows_spor = None, user=curuser[0], click=0)
 
     tmp = c.fetchall()
+    print(ime_priimek)
     if len(tmp) == 0:
         # ID osebe v bazi ne obstaja
         return template("index.html", napaka="Nepravilna poizvedba, ID ne obstaja", rows_spor = None, user=curuser[0], click = 0)
@@ -519,18 +520,48 @@ def pregled_post():
                 [request.forms.testZdaj])
     testZdaj = c.fetchone()[0]
 
+    c.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                    WHERE sporocila.prejemnik = %s
+                    ORDER BY sporocila.datum DESC
+                    LIMIT 3""",
+                   [curuser[0]])
+    tmp_spor = c.fetchall()
+
+    c.execute("""SELECT ime FROM test
+                    ORDER BY ime""")
+    test_seznam = vrni_prvi_stolpec(c.fetchall())
+    c.execute("""SELECT ime FROM test
+                    JOIN specializacija ON test.testid = specializacija.test
+                    WHERE zdravnik = %s
+                    ORDER BY ime""",
+              [curuser[0]])
+
+    test_seznam2 = vrni_prvi_stolpec(c.fetchall())
+
+    c.execute("""SELECT DISTINCT ime FROM bolezen
+                    ORDER BY ime""")
+    diagnoza_seznam = vrni_prvi_stolpec(c.fetchall())
+    c.execute("""SELECT DISTINCT ime FROM zdravilo
+                    ORDER BY ime""")
+    zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
+
     izvid = request.forms.izvid
     if izvid == '':
         izvid = 'NULL'
-    c = baza.cursor()
     if request.forms.testNaprej != "":
+        if request.forms.diagnoza != "" or request.forms.zdravilo != "":
+            return template("pregled.html", user=curuser[0], napaka="Vnesete lahko ali samo šifro naslednjega testa ali samo diagnozo in zdravilo, ne oboje!",
+                            test_seznam=test_seznam,
+                            test_seznam2=test_seznam2, diagnoza_seznam=diagnoza_seznam,
+                            zdravilo_seznam=zdravilo_seznam,
+                            rows_spor=tmp_spor)
         c.execute("""SELECT testid FROM test
                     WHERE ime = %s""",
                   [request.forms.testNaprej])
         testNaprej = c.fetchone()[0]
         vrstica = [ID, zdravnik, testZdaj, testNaprej, izvid]
         c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,izvid)
-                    VALUES ({0},'{1}','{2}','{3}','{4}');""".format(*vrstica))
+                    VALUES (%s,%s,%s,%s,%s);""",vrstica)
     else:
         c.execute("""SELECT bolezenid FROM bolezen
                     WHERE ime = %s""",
@@ -542,16 +573,16 @@ def pregled_post():
         zdravilo = c.fetchone()[0]
         vrstica2 = [diagnoza, zdravilo, zdravnik]
         c.execute("""INSERT INTO diagnoza(bolezen,zdravilo,zdravnik) 
-                    VALUES ('{0}','{1}','{2}');""".format(*vrstica2))
+                    VALUES (%s,%s,%s);""",vrstica2)
         c.execute("""SELECT diagnozaid FROM diagnoza
                     ORDER BY diagnozaid DESC
                     LIMIT 1;""")
         diagnozaid = c.fetchone()[0]
-        vrstica1 = [ID, zdravnik, testZdaj, 'NULL', diagnozaid, izvid]
-        c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,testNaprej,diagnoza,izvid)
-                    VALUES ({0},'{1}','{2}',{3},{4},'{5}');
-                    UPDATE pregled SET diagnoza = {4}
-                    WHERE oseba = {0} AND diagnoza IS NULL""".format(*vrstica1))
+        vrstica1 = [ID, zdravnik, testZdaj, diagnozaid, izvid, diagnozaid, ID]
+        c.execute("""INSERT INTO pregled (oseba,zdravnik,testZdaj,diagnoza,izvid)
+                    VALUES (%s,%s,%s,%s,%s);
+                    UPDATE pregled SET diagnoza = %s
+                    WHERE oseba = %s AND diagnoza IS NULL""",vrstica1)
     redirect('/index/')
 
 
