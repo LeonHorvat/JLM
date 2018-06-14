@@ -112,4 +112,10 @@ GRANT ALL ON sporocila TO metodj;
 GRANT ALL ON sporocila TO leonh;
 GRANT ALL ON sporocila TO jernejb;
 
+/* Grant za javnost*/
+GRANT CONNECT ON DATABASE sem2018_leonh TO javnost;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO javnost;
+GRANT SELECT, UPDATE, INSERT ON ALL TABLES IN SCHEMA public TO javnost;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO javnost;
+
 
