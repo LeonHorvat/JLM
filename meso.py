@@ -3,6 +3,9 @@ import auth_public as auth
 import psycopg2, psycopg2.extensions, psycopg2.extras
 import hashlib
 
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 ################
 #priklop na bazo
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s sumniki
@@ -82,6 +85,23 @@ def get_user(auto_login = True, auto_redir=False):
         redirect('/login/')
     else:
         return None
+
+def preusmeri(param, pooblastilo):
+    if param == "zdravnik":
+        if pooblastilo == 'raziskovalec':
+            redirect('/indexraziskovalec/')
+        elif pooblastilo == 'direktor':
+            redirect('/indexdirektor/')
+    elif param == "direktor":
+        if pooblastilo == 'raziskovalec':
+            redirect('/indexraziskovalec/')
+        elif pooblastilo == 'zdravnik':
+            redirect('/index/')
+    elif param == 'raziskovalec':
+        if pooblastilo == 'zdravnik':
+            redirect('/index/')
+        elif pooblastilo == 'direktor':
+            redirect('/indexdirektor/')
 
 @route("/static/<filename:path>")
 def static(filename):
@@ -210,12 +230,8 @@ def index():
                 LIMIT 3""",
               [curuser[0]])
     tmp1 = cur.fetchall()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'direktor':
-        redirect('/indexdirektor/')
-    else:
-        return template("index.html", rows_spor = tmp1, user=curuser[0], click = 0, napaka = None)
+    preusmeri('zdravnik',pooblastilo(curuser[0]))
+    return template("index.html", rows_spor = tmp1, user=curuser[0], click = 0, napaka = None)
 
 @post("/index/")
 def kartoteka():
@@ -311,28 +327,24 @@ def kartoteka():
 @get("/indexdirektor/")
 def index_direktor():
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'zdravnik':
-        redirect('/index/')
-    else:
-        cur.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
-                        WHERE zahtevek.odobreno = %s
-                        ORDER BY zahtevek.datum DESC""",
-                  [False])
-        tmp = cur.fetchall()
-        cur.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
-                        WHERE zahtevek.odobreno = %s
-                        ORDER BY zahtevek.datum DESC""",
-                  [True])
-        tmp1 = cur.fetchall()
-        cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
-                    WHERE sporocila.prejemnik = %s
-                    ORDER BY sporocila.datum DESC
-                    LIMIT 3""",
-                  [curuser[0]])
-        tmp2 = cur.fetchall()
-        return template("indexdirektor.html", rows=tmp, rows_p=tmp1, rows_spor=tmp2, user=curuser[0], napaka=None)
+    preusmeri('direktor', pooblastilo(curuser[0]))
+    cur.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                    WHERE zahtevek.odobreno = %s
+                    ORDER BY zahtevek.datum DESC""",
+              [False])
+    tmp = cur.fetchall()
+    cur.execute("""SELECT username, ime, priimek, ustanova, mail FROM zahtevek
+                    WHERE zahtevek.odobreno = %s
+                    ORDER BY zahtevek.datum DESC""",
+              [True])
+    tmp1 = cur.fetchall()
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+                WHERE sporocila.prejemnik = %s
+                ORDER BY sporocila.datum DESC
+                LIMIT 3""",
+              [curuser[0]])
+    tmp2 = cur.fetchall()
+    return template("indexdirektor.html", rows=tmp, rows_p=tmp1, rows_spor=tmp2, user=curuser[0], napaka=None)
 
 @post("/indexdirektor/")
 def index_direktor():
@@ -340,6 +352,7 @@ def index_direktor():
         cur.execute("""DELETE FROM zahtevek
                             WHERE zahtevek.username = %s""",
                    [str(request.params.seznam)])
+        #print(str(request.params.seznam))
     if (str(request.params.type) == "odobri"):
         cur.execute("""UPDATE zahtevek SET odobreno = true
                                 WHERE zahtevek.username = %s""",
@@ -363,6 +376,7 @@ def index_direktor():
     #update: sedaj se stran osvezi ob kliku na gumb (samo potrebno je bilo sprementi parameter v location.reload()
     # na true. Ni sicer najlepsa resitev, lepse bi bilo, ce bi se tabele na strani posodobile, brez osvezitve strani.
     # Za to bi bilo potrebno bolj podrobno pogledati jquery.
+
 def vrni_prvi_stolpec(seznam):
     #odstrani nepotrebne znake okrog besedila
     nov = []
@@ -373,24 +387,20 @@ def vrni_prvi_stolpec(seznam):
 @get("/indexraziskovalec/")
 def index_raziskovalec():
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'zdravnik':
-        redirect('/index/')
-    elif pooblastilo(curuser[0]) == 'direktor':
-        redirect('/indexdirektor/')
-    else:
-        cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
-                WHERE sporocila.prejemnik = %s
-                ORDER BY sporocila.datum DESC
-                LIMIT 3""",
-              [curuser[0]])
-        tmp1 = cur.fetchall()
-        cur.execute("""SELECT DISTINCT ime FROM zdravilo
-                    ORDER BY ime""")
-        zdravilo_seznam = vrni_prvi_stolpec(cur.fetchall())
-        cur.execute("""SELECT DISTINCT ime FROM bolezen
-                    ORDER BY ime""")
-        bolezen_seznam = vrni_prvi_stolpec(cur.fetchall())
-        return template("indexraziskovalec.html", rows_spor = tmp1, user=curuser[0], zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, click = 0)
+    preusmeri('raziskovalec', pooblastilo(curuser[0]))
+    cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
+            WHERE sporocila.prejemnik = %s
+            ORDER BY sporocila.datum DESC
+            LIMIT 3""",
+          [curuser[0]])
+    tmp1 = cur.fetchall()
+    cur.execute("""SELECT DISTINCT ime FROM zdravilo
+                ORDER BY ime""")
+    zdravilo_seznam = vrni_prvi_stolpec(cur.fetchall())
+    cur.execute("""SELECT DISTINCT ime FROM bolezen
+                ORDER BY ime""")
+    bolezen_seznam = vrni_prvi_stolpec(cur.fetchall())
+    return template("indexraziskovalec.html", rows_spor = tmp1, user=curuser[0], zdravilo_seznam = zdravilo_seznam, bolezen_seznam = bolezen_seznam, click = 0)
 
 def odstrani_nicle(seznam):
     """Odstrani nicle pri letu v seznamu tock, kjer so leta na prvem mestu v tocki"""
@@ -466,34 +476,30 @@ def pregled():
                 LIMIT 3""",
               [curuser[0]])
     tmp_spor = cur.fetchall()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'direktor':
-        redirect('/indexdirektor/')
-    else:
-        c = baza.cursor()
-        c.execute("""SELECT ime FROM test
-                    ORDER BY ime""")
-        test_seznam = vrni_prvi_stolpec(c.fetchall())
-        c.execute("""SELECT ime FROM test
-                    JOIN specializacija ON test.testid = specializacija.test
-                    WHERE zdravnik = %s
-                    ORDER BY ime""",
-                    [curuser[0]])
+    preusmeri('zdravnik', pooblastilo(curuser[0]))
+    c = baza.cursor()
+    c.execute("""SELECT ime FROM test
+                ORDER BY ime""")
+    test_seznam = vrni_prvi_stolpec(c.fetchall())
+    c.execute("""SELECT ime FROM test
+                JOIN specializacija ON test.testid = specializacija.test
+                WHERE zdravnik = %s
+                ORDER BY ime""",
+                [curuser[0]])
 
-        test_seznam2 = vrni_prvi_stolpec(c.fetchall())
+    test_seznam2 = vrni_prvi_stolpec(c.fetchall())
 
-        c.execute("""SELECT DISTINCT ime FROM bolezen
-                    ORDER BY ime""")
-        diagnoza_seznam = vrni_prvi_stolpec(c.fetchall())
-        c.execute("""SELECT DISTINCT ime FROM zdravilo
-                    ORDER BY ime""")
-        zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
-        return template("pregled.html", user=curuser[0], napaka = None,
-                        test_seznam = test_seznam,
-                        test_seznam2=test_seznam2,diagnoza_seznam = diagnoza_seznam,
-                        zdravilo_seznam=zdravilo_seznam,
-                        rows_spor = tmp_spor)
+    c.execute("""SELECT DISTINCT ime FROM bolezen
+                ORDER BY ime""")
+    diagnoza_seznam = vrni_prvi_stolpec(c.fetchall())
+    c.execute("""SELECT DISTINCT ime FROM zdravilo
+                ORDER BY ime""")
+    zdravilo_seznam = vrni_prvi_stolpec(c.fetchall())
+    return template("pregled.html", user=curuser[0], napaka = None,
+                    test_seznam = test_seznam,
+                    test_seznam2=test_seznam2,diagnoza_seznam = diagnoza_seznam,
+                    zdravilo_seznam=zdravilo_seznam,
+                    rows_spor = tmp_spor)
 
 @post("/index/pregled/")
 def pregled_post():
@@ -578,10 +584,7 @@ def pregled_post():
 def messenger():
     '''Servira stran (na novi routi) z vsemi sporocili, tudi z vstavljanjem'''
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'direktor':
-        redirect('/indexdirektor/')
+    preusmeri('zdravnik', pooblastilo(curuser[0]))
     cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
@@ -627,10 +630,7 @@ def novo_sporocilo():
 def messenger():
     '''Servira stran (na novi routi) z vsemi sporocili, tudi z vstavljanjem'''
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'zdravnik':
-        redirect('/index/')
-    elif pooblastilo(curuser[0]) == 'direktor':
-        redirect('/indexdirektor/')
+    preusmeri('raziskovalec', pooblastilo(curuser[0]))
     cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
@@ -676,10 +676,7 @@ def novo_sporocilo():
 def messenger():
     '''Servira stran (na novi routi) z vsemi sporocili, tudi z vstavljanjem'''
     curuser = get_user()
-    if pooblastilo(curuser[0]) == 'raziskovalec':
-        redirect('/indexraziskovalec/')
-    elif pooblastilo(curuser[0]) == 'zdravnik':
-        redirect('/index/')
+    preusmeri('direktor', pooblastilo(curuser[0]))
     cur.execute("""SELECT posiljatelj, datum, vsebina FROM sporocila
                 WHERE sporocila.prejemnik = %s
                 ORDER BY sporocila.datum DESC""",
